@@ -1,6 +1,7 @@
 # This file is a part of ElasticArrays.jl, licensed under the MIT License (MIT).
 
 using Base: @propagate_inbounds
+using Base.MultiplicativeInverses: SignedMultiplicativeInverse
 
 
 _tuple_head_tail(xs::Tuple) = _tuple_head_tail_impl(xs...)
@@ -26,14 +27,18 @@ Constructors:
 """
 struct ElasticArray{T,N,M} <: DenseArray{T,N}
     kernel_size::NTuple{M,Int}
-    kernel_length::Int
+    kernel_length::SignedMultiplicativeInverse{Int}
     data::Vector{T}
 
     function ElasticArray{T}(dims::Integer...) where {T}
         kernel_size, size_lastdim = _split_dims(dims)
         kernel_length = prod(kernel_size)
         data = Vector{T}(kernel_length * size_lastdim)
-        new{T,length(dims),length(kernel_size)}(kernel_size, kernel_length, data)
+        new{T,length(dims),length(kernel_size)}(
+            kernel_size,
+            SignedMultiplicativeInverse{Int64}(kernel_length),
+            data
+        )
     end
 end
 
@@ -61,20 +66,20 @@ Base.linearindices(A::ElasticArray) = linearindices(A.data)
 
 function Base.resize!(A::ElasticArray, dims::Integer...)
     kernel_size, size_lastdim = _split_resize_dims(A, dims)
-    resize!(A.data, A.kernel_length * size_lastdim)
+    resize!(A.data, A.kernel_length.divisor * size_lastdim)
     A
 end
 
 
 function Base.sizehint!(A::ElasticArray, dims::Integer...)
     kernel_size, size_lastdim = _split_resize_dims(A, dims)
-    sizehint!(A.data, A.kernel_length * size_lastdim)
+    sizehint!(A.data, A.kernel_length.divisor * size_lastdim)
     A
 end
 
 
 function Base.append!(dest::ElasticArray, src::AbstractArray)
-    mod(length(linearindices(src)), dest.kernel_length) != 0 && throw(DimensionMismatch("Can't append, length of source array is incompatible"))
+    rem(length(linearindices(src)), dest.kernel_length) != 0 && throw(DimensionMismatch("Can't append, length of source array is incompatible"))
     append!(dest.data, src)
     dest
 end
