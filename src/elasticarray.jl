@@ -63,6 +63,8 @@ function _split_resize_dims(A::ElasticArray, dims::NTuple{N,Integer}) where {N}
 end
 
 
+Base.parent(A::ElasticArray) = A.data
+
 Base.size(A::ElasticArray) = (A.kernel_size..., div(length(linearindices(A.data)), A.kernel_length))
 @propagate_inbounds Base.getindex(A::ElasticArray, i::Integer) = getindex(A.data, i)
 @propagate_inbounds Base.setindex!(A::ElasticArray, x, i::Integer) = setindex!(A.data, x, i)
