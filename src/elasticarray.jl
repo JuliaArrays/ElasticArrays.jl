@@ -1,5 +1,7 @@
 # This file is a part of ElasticArrays.jl, licensed under the MIT License (MIT).
 
+using Base: @propagate_inbounds
+
 
 _tuple_head_tail(xs::Tuple) = _tuple_head_tail_impl(xs...)
 _tuple_head_tail_impl(x, xs...) = x, xs
@@ -49,8 +51,8 @@ end
 
 
 Base.size(A::ElasticArray) = (A.kernel_size..., div(length(linearindices(A.data)), A.kernel_length))
-Base.getindex(A::ElasticArray, i::Integer) = getindex(A.data, i)
-Base.setindex!(A::ElasticArray, x, i::Integer) = setindex!(A.data, x, i)
+@propagate_inbounds Base.getindex(A::ElasticArray, i::Integer) = getindex(A.data, i)
+@propagate_inbounds Base.setindex!(A::ElasticArray, x, i::Integer) = setindex!(A.data, x, i)
 Base.IndexStyle(::ElasticArray) = IndexLinear()
 
 Base.length(A::ElasticArray) = length(A.data)
