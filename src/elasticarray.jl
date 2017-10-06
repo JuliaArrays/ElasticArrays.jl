@@ -85,6 +85,13 @@ function Base.append!(dest::ElasticArray, src::AbstractArray)
 end
 
 
+function Base.prepend!(dest::ElasticArray, src::AbstractArray)
+    rem(length(linearindices(src)), dest.kernel_length) != 0 && throw(DimensionMismatch("Can't prepend, length of source array is incompatible"))
+    prepend!(dest.data, src)
+    dest
+end
+
+
 function _copy_impl!(dest::ElasticArray, args...)
     copy!(dest.data, args...)
     dest
