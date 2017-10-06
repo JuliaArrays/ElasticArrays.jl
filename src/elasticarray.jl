@@ -64,14 +64,14 @@ Base.length(A::ElasticArray) = length(A.data)
 Base.linearindices(A::ElasticArray) = linearindices(A.data)
 
 
-function Base.resize!(A::ElasticArray, dims::Integer...)
+function Base.resize!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N}
     kernel_size, size_lastdim = _split_resize_dims(A, dims)
     resize!(A.data, A.kernel_length.divisor * size_lastdim)
     A
 end
 
 
-function Base.sizehint!(A::ElasticArray, dims::Integer...)
+function Base.sizehint!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N}
     kernel_size, size_lastdim = _split_resize_dims(A, dims)
     sizehint!(A.data, A.kernel_length.divisor * size_lastdim)
     A
