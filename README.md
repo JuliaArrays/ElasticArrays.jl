@@ -1,1 +1,1 @@
-# ElasticArrays
+# ElasticArrays.jl
