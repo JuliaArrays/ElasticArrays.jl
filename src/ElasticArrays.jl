@@ -5,6 +5,7 @@ __precompile__(true)
 module ElasticArrays
 
 
+include("util.jl")
 include("elasticarray.jl")
 
 

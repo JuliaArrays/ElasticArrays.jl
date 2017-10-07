@@ -34,20 +34,6 @@ end
 export ElasticArray
 
 
-
-function _split_dims(dims::NTuple{N,Integer}) where {N}
-    int_dims = Int.(dims)
-    Base.front(int_dims), int_dims[end]
-end
-
-
-_array_growbeg!(a::Vector, delta::Integer) =
-    ccall(:jl_array_grow_beg, Void, (Any, UInt), a, delta)
-
-_array_deletebeg!(a::Vector, delta::Integer) =
-    ccall(:jl_array_del_beg, Void, (Any, UInt), a, delta)
-
-
 function _split_resize_dims(A::ElasticArray, dims::NTuple{N,Integer}) where {N}
     kernel_size, size_lastdim = _split_dims(dims)
     kernel_size != A.kernel_size && throw(ArgumentError("Can only resize last dimension of an ElasticArray"))
