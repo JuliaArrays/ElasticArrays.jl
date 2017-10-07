@@ -4,13 +4,6 @@ using Base: @propagate_inbounds
 using Base.MultiplicativeInverses: SignedMultiplicativeInverse
 
 
-_tuple_head_tail(xs::Tuple) = _tuple_head_tail_impl(xs...)
-_tuple_head_tail_impl(x, xs...) = x, xs
-
-function _tuple_firsts_last(xs::Tuple)
-    Base.front(xs), xs[end]
-end
-
 """
     ElasticArray{T,N,M} <: DenseArray{T,N}
 
@@ -42,7 +35,10 @@ export ElasticArray
 
 
 
-_split_dims(dims::NTuple{N,Integer}) where {N} = _tuple_firsts_last(Int.(dims))
+function _split_dims(dims::NTuple{N,Integer}) where {N}
+    int_dims = Int.(dims)
+    Base.front(int_dims), int_dims[end]
+end
 
 
 _array_growbeg!(a::Vector, delta::Integer) =
