@@ -8,17 +8,13 @@ _tuple_head_tail(xs::Tuple) = _tuple_head_tail_impl(xs...)
 _tuple_head_tail_impl(x, xs...) = x, xs
 
 function _tuple_firsts_last(xs::Tuple)
-    a, b = _tuple_head_tail(reverse(xs))
-    reverse(b), a
+    Base.front(xs), xs[end]
 end
-
-@inline _int_tuple(xs::NTuple{N,Integer}) where {N} = map(x -> convert(Int, x), xs)
-
 
 """
     ElasticArray{T,N,M} <: DenseArray{T,N}
 
-An `ElasticArray` is resizeable in it's last dimension. `N` is the total
+An `ElasticArray` can grow in its last dimension. `N` is the total
 number of dimensions, `N == M + 1` the number of non-resizable dimensions.
 
 Constructors:
@@ -46,7 +42,7 @@ export ElasticArray
 
 
 
-_split_dims(dims::NTuple{N,Integer}) where {N} = _tuple_firsts_last(_int_tuple(dims))
+_split_dims(dims::NTuple{N,Integer}) where {N} = _tuple_firsts_last(Int.(dims))
 
 
 _array_growbeg!(a::Vector, delta::Integer) =
