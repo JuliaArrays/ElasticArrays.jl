@@ -102,5 +102,11 @@ function _copy_impl!(dest::ElasticArray, args...)
     dest
 end
 
-Base.copy!(dest::ElasticArray, doffs::Integer, src::AbstractArray, args...) = _copy_impl!(dest, doffs, src, args...)
+Base.copy!(dest::ElasticArray, doffs::Integer, src::AbstractArray, args::Integer...) = _copy_impl!(dest, doffs, src, args...)
 Base.copy!(dest::ElasticArray, src::AbstractArray) = _copy_impl!(dest, src)
+
+Base.copy!(dest::ElasticArray, doffs::Integer, src::ElasticArray, args::Integer...) = _copy_impl!(dest, doffs, src, args...)
+Base.copy!(dest::ElasticArray, src::ElasticArray) = _copy_impl!(dest, src)
+
+Base.copy!(dest::AbstractArray, doffs::Integer, src::ElasticArray, args::Integer...) = copy!(dest, doffs, src.data, args...)
+Base.copy!(dest::AbstractArray, src::ElasticArray) = copy!(dest, src.data)
