@@ -25,7 +25,7 @@ struct ElasticArray{T,N,M} <: DenseArray{T,N}
         data = Vector{T}(kernel_length * size_lastdim)
         new{T,length(dims),length(kernel_size)}(
             kernel_size,
-            SignedMultiplicativeInverse{Int64}(kernel_length),
+            SignedMultiplicativeInverse{Int}(kernel_length),
             data
         )
     end
