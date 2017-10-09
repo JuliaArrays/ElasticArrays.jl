@@ -65,23 +65,6 @@ function Base.resize!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N}
 end
 
 
-function resize_beg!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N}
-    kernel_size, size_lastdim = _split_resize_dims(A, dims)
-    data = A.data
-    l_old = length(linearindices(data))
-    l_new = A.kernel_length.divisor * size_lastdim
-    if (l_old != l_new)
-        l_new < 0 && throw(ArgumentError("new length must be ≥ 0"))
-        if l_new > l_old
-            _array_growbeg!(data, l_new - l_old)
-        else
-            _array_deletebeg!(data, l_old - l_new)
-        end
-    end
-    A
-end
-
-
 function Base.sizehint!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N}
     kernel_size, size_lastdim = _split_resize_dims(A, dims)
     sizehint!(A.data, A.kernel_length.divisor * size_lastdim)
