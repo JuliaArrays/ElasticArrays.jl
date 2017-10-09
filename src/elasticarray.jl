@@ -111,3 +111,9 @@ Base.copy!(dest::ElasticArray, src::ElasticArray) = _copy_impl!(dest, src)
 
 Base.copy!(dest::AbstractArray, doffs::Integer, src::ElasticArray, args::Integer...) = copy!(dest, doffs, src.data, args...)
 Base.copy!(dest::AbstractArray, src::ElasticArray) = copy!(dest, src.data)
+
+Base.convert(::Type{ElasticArray{T}}, A::AbstractArray) where {T} =
+    copy!(ElasticArray{T}(size(A)...), A)
+
+Base.convert(::Type{ElasticArray}, A::AbstractArray{T}) where {T} =
+    convert(ElasticArray{T}, A)
