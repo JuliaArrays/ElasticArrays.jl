@@ -1,7 +1,7 @@
 # This file is a part of BAT.jl, licensed under the MIT License (MIT).
 
 using ElasticArrays
-using Base.Test
+using Compat.Test
 
 @testset "elasticarray" begin
     dims = (3, 2)
