@@ -85,7 +85,7 @@ using Compat.Test
     end
 
 
-    @testset "copy! and convert" begin
+    @testset "copy!, convert and similar" begin
         test_E_A() do E, A
             @test E === @inferred copy!(E, A)
             @test E == A
@@ -136,6 +136,9 @@ using Compat.Test
             @test E == A
             @test eltype(E) == eltype(A)
         end
+
+        @test typeof(@inferred similar(ElasticArray{Int}(2,3), Float32, 2,3,4)) ==
+            ElasticArray{Float32,3,2}
     end
 
 

@@ -105,3 +105,6 @@ Base.convert(::Type{ElasticArray{T}}, A::AbstractArray) where {T} =
 
 Base.convert(::Type{ElasticArray}, A::AbstractArray{T}) where {T} =
     convert(ElasticArray{T}, A)
+
+Base.similar(A::ElasticArray, ::Type{T}, dims::Dims{N}) where {T,N} =
+    ElasticArray{T}(dims...)
