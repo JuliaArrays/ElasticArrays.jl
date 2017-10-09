@@ -41,6 +41,11 @@ function _split_resize_dims(A::ElasticArray, dims::NTuple{N,Integer}) where {N}
 end
 
 
+import Base.==
+(==)(A::ElasticArray, B::ElasticArray) =
+    ndims(A) == ndims(B) && A.kernel_size == B.kernel_size && A.data == B.data
+
+
 Base.parent(A::ElasticArray) = A.data
 
 Base.size(A::ElasticArray) = (A.kernel_size..., div(length(linearindices(A.data)), A.kernel_length))
