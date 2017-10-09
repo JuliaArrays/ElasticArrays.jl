@@ -51,6 +51,7 @@ Base.IndexStyle(::ElasticArray) = IndexLinear()
 Base.length(A::ElasticArray) = length(A.data)
 Base.linearindices(A::ElasticArray) = linearindices(A.data)
 
+Base.repremptyarray(io::IO, X::ElasticArray{T}) where {T} = print(io, "ElasticArray{$T}(", join(size(X),','), ')')
 
 function Base.resize!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N}
     kernel_size, size_lastdim = _split_resize_dims(A, dims)
