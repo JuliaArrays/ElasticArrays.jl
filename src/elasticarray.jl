@@ -4,11 +4,11 @@ using Base: @propagate_inbounds
 using Base.MultiplicativeInverses: SignedMultiplicativeInverse
 
 
-"""
+doc"""
     ElasticArray{T,N,M} <: DenseArray{T,N}
 
-An `ElasticArray` can grow in its last dimension. `N` is the total
-number of dimensions, `N == M + 1` the number of non-resizable dimensions.
+An `ElasticArray` can grow/shrink in its last dimension. `N` is the total
+number of dimensions, `M == N - 1` the number of non-resizable dimensions.
 
 Constructors:
 
