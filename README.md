@@ -1,5 +1,8 @@
 # ElasticArrays.jl
 
+[![Build Status](https://travis-ci.org/JuliaArrays/ElasticArrays.jl.svg?branch=master)](https://travis-ci.org/JuliaArrays/ElasticArrays.jl)
+[![Build status](https://ci.appveyor.com/api/projects/status/4kk8pn2ladmiqqk9/branch/master?svg=true)](https://ci.appveyor.com/project/oschulz/elasticarrays-jl/branch/master)
+
 ElasticArrays provides resizeable multidimensional arrays for Julia.
 
 An `ElasticArray` is a fast, contiguous array that can grow and shrink, but
