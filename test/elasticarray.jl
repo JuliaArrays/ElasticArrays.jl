@@ -137,8 +137,8 @@ using Compat.Test
             @test eltype(E) == eltype(A)
         end
 
-        @test typeof(@inferred similar(ElasticArray{Int}(2,3), Float32, 2,3,4)) ==
-            ElasticArray{Float32,3,2}
+        @test typeof(@inferred similar(ElasticArray{Int}, (2,3,4))) == ElasticArray{Int,3,2}
+        @test size(@inferred similar(ElasticArray{Int}, (2,3,4))) == (2,3,4)
     end
 
 
