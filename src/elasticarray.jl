@@ -108,3 +108,8 @@ Base.convert(::Type{ElasticArray}, A::AbstractArray{T}) where {T} =
 
 
 Base.similar(::Type{ElasticArray{T}}, dims::Dims{N}) where {T,N} = ElasticArray{T}(dims...)
+
+
+Base.unsafe_convert(::Type{Ptr{T}}, A::ElasticArray{T}) where T = Base.unsafe_convert(Ptr{T}, A.data)
+
+Base.pointer(A::ElasticArray, i::Integer) = pointer(A.data, i)
