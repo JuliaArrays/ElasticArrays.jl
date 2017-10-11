@@ -142,6 +142,18 @@ using Compat.Test
     end
 
 
+    @testset "pointer and unsafe_convert" begin
+        test_E() do E
+            @test pointer(E) == pointer(parent(E))
+            @test pointer(E, 4) == pointer(parent(E), 4)
+        end
+
+        test_E() do E
+            @test Base.unsafe_convert(Ptr{eltype(E)}, E) == Base.unsafe_convert(Ptr{eltype(E)}, parent(E))
+        end
+    end
+
+
     @testset "resize!" begin
         function resize_test(delta::Integer)
             test_E() do E
