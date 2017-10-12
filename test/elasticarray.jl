@@ -202,4 +202,32 @@ using Compat.Test
             @test test_comp(E, V)
         end
     end
+
+
+    @testset "basic math" begin
+        T = Float64
+        E1 = rand!(ElasticArray{T}(9, 9))
+        E2 = rand!(ElasticArray{T}(9, 9))
+        E3 = rand!(ElasticArray{T}(9, 7))
+
+        A1 = Array(E1)
+        A2 = Array(E2)
+        A3 = Array(E3)
+
+        @test @inferred(2 * E1) isa Array{T,2}
+        @test 2 * E1 == 2 * A1
+
+        @test @inferred(E1 + 2) isa Array{T,2}
+        @test E1 + 2 == A1 + 2
+
+        @test @inferred(E1 + E2) isa Array{T,2}
+        @test E1 + E2 == A1 + A2
+
+        @test @inferred(E1 * E2) isa Array{T,2}
+        @test E1 * E2 == A1 * A2
+        @test E1 * E3 == A1 * A3
+
+        @test E1^3 == A1^3
+        @test inv(E1) == inv(A1)
+    end
 end
