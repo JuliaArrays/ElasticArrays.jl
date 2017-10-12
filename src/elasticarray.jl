@@ -13,6 +13,7 @@ number of dimensions, `M == N - 1` the number of non-resizable dimensions.
 Constructors:
 
     ElasticArray{T}(dims::Integer...)
+    convert(ElasticArray, A::AbstractArray)
 """
 struct ElasticArray{T,N,M} <: DenseArray{T,N}
     kernel_size::NTuple{M,Int}
