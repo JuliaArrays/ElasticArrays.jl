@@ -59,7 +59,9 @@ Base._length(A::ElasticArray) = Base._length(A.data)
 
 Base.linearindices(A::ElasticArray) = linearindices(A.data)
 
-Base.repremptyarray(io::IO, X::ElasticArray{T}) where {T} = print(io, "ElasticArray{$T}(", join(size(X),','), ')')
+@static if VERSION < v"0.7.0-DEV.2791"
+    Base.repremptyarray(io::IO, X::ElasticArray{T}) where {T} = print(io, "ElasticArray{$T}(", join(size(X),','), ')')
+end
 
 function Base.resize!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N}
     kernel_size, size_lastdim = _split_resize_dims(A, dims)
