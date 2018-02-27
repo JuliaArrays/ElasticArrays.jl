@@ -63,14 +63,14 @@ Base.linearindices(A::ElasticArray) = linearindices(A.data)
     Base.repremptyarray(io::IO, X::ElasticArray{T}) where {T} = print(io, "ElasticArray{$T}(", join(size(X),','), ')')
 end
 
-function Base.resize!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N}
+@inline function Base.resize!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N}
     kernel_size, size_lastdim = _split_resize_dims(A, dims)
     resize!(A.data, A.kernel_length.divisor * size_lastdim)
     A
 end
 
 
-function Base.sizehint!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N}
+@inline function Base.sizehint!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N}
     kernel_size, size_lastdim = _split_resize_dims(A, dims)
     sizehint!(A.data, A.kernel_length.divisor * size_lastdim)
     A
@@ -91,19 +91,19 @@ function Base.prepend!(dest::ElasticArray, src::AbstractArray)
 end
 
 
-function _copy_impl!(dest::ElasticArray, args...)
+@inline function _copy_impl!(dest::ElasticArray, args...)
     copy!(dest.data, args...)
     dest
 end
 
-Base.copy!(dest::ElasticArray, doffs::Integer, src::AbstractArray, args::Integer...) = _copy_impl!(dest, doffs, src, args...)
-Base.copy!(dest::ElasticArray, src::AbstractArray) = _copy_impl!(dest, src)
+@inline Base.copy!(dest::ElasticArray, doffs::Integer, src::AbstractArray, args::Integer...) = _copy_impl!(dest, doffs, src, args...)
+@inline Base.copy!(dest::ElasticArray, src::AbstractArray) = _copy_impl!(dest, src)
 
-Base.copy!(dest::ElasticArray, doffs::Integer, src::ElasticArray, args::Integer...) = _copy_impl!(dest, doffs, src, args...)
-Base.copy!(dest::ElasticArray, src::ElasticArray) = _copy_impl!(dest, src)
+@inline Base.copy!(dest::ElasticArray, doffs::Integer, src::ElasticArray, args::Integer...) = _copy_impl!(dest, doffs, src, args...)
+@inline Base.copy!(dest::ElasticArray, src::ElasticArray) = _copy_impl!(dest, src)
 
-Base.copy!(dest::AbstractArray, doffs::Integer, src::ElasticArray, args::Integer...) = copy!(dest, doffs, src.data, args...)
-Base.copy!(dest::AbstractArray, src::ElasticArray) = copy!(dest, src.data)
+@inline Base.copy!(dest::AbstractArray, doffs::Integer, src::ElasticArray, args::Integer...) = copy!(dest, doffs, src.data, args...)
+@inline Base.copy!(dest::AbstractArray, src::ElasticArray) = copy!(dest, src.data)
 
 Base.convert(::Type{ElasticArray{T}}, A::AbstractArray) where {T} =
     copy!(ElasticArray{T}(size(A)...), A)
