@@ -4,7 +4,7 @@ using Base: @propagate_inbounds
 using Base.MultiplicativeInverses: SignedMultiplicativeInverse
 
 
-doc"""
+@doc doc"""
     ElasticArray{T,N,M} <: DenseArray{T,N}
 
 An `ElasticArray` can grow/shrink in its last dimension. `N` is the total
@@ -20,10 +20,10 @@ struct ElasticArray{T,N,M} <: DenseArray{T,N}
     kernel_length::SignedMultiplicativeInverse{Int}
     data::Vector{T}
 
-    function ElasticArray{T}(dims::Integer...) where {T}
+    function ElasticArray{T}(::Uninitialized, dims::Integer...) where {T}
         kernel_size, size_lastdim = _split_dims(dims)
         kernel_length = prod(kernel_size)
-        data = Vector{T}(kernel_length * size_lastdim)
+        data = Vector{T}(uninitialized, kernel_length * size_lastdim)
         new{T,length(dims),length(kernel_size)}(
             kernel_size,
             SignedMultiplicativeInverse{Int}(kernel_length),
@@ -91,28 +91,34 @@ function Base.prepend!(dest::ElasticArray, src::AbstractArray)
 end
 
 
-@inline function _copy_impl!(dest::ElasticArray, args...)
-    copy!(dest.data, args...)
+@inline function _copyto_impl!(dest::ElasticArray, args...)
+    copyto!(dest.data, args...)
     dest
 end
 
-@inline Base.copy!(dest::ElasticArray, doffs::Integer, src::AbstractArray, args::Integer...) = _copy_impl!(dest, doffs, src, args...)
-@inline Base.copy!(dest::ElasticArray, src::AbstractArray) = _copy_impl!(dest, src)
+@inline Compat.copyto!(dest::ElasticArray, doffs::Integer, src::AbstractArray, args::Integer...) = _copyto_impl!(dest, doffs, src, args...)
+@inline Compat.copyto!(dest::ElasticArray, src::AbstractArray) = _copyto_impl!(dest, src)
 
-@inline Base.copy!(dest::ElasticArray, doffs::Integer, src::ElasticArray, args::Integer...) = _copy_impl!(dest, doffs, src, args...)
-@inline Base.copy!(dest::ElasticArray, src::ElasticArray) = _copy_impl!(dest, src)
+@inline Compat.copyto!(dest::ElasticArray, doffs::Integer, src::ElasticArray, args::Integer...) = _copyto_impl!(dest, doffs, src, args...)
+@inline Compat.copyto!(dest::ElasticArray, src::ElasticArray) = _copyto_impl!(dest, src)
 
-@inline Base.copy!(dest::AbstractArray, doffs::Integer, src::ElasticArray, args::Integer...) = copy!(dest, doffs, src.data, args...)
-@inline Base.copy!(dest::AbstractArray, src::ElasticArray) = copy!(dest, src.data)
+@inline Compat.copyto!(dest::AbstractArray, doffs::Integer, src::ElasticArray, args::Integer...) = copyto!(dest, doffs, src.data, args...)
+@inline Compat.copyto!(dest::AbstractArray, src::ElasticArray) = copyto!(dest, src.data)
 
-Base.convert(::Type{ElasticArray{T}}, A::AbstractArray) where {T} =
-    copy!(ElasticArray{T}(size(A)...), A)
+@static if VERSION < v"0.7.0-DEV.3138"
+    Base.convert(::Type{ElasticArray{T}}, A::AbstractArray) where {T} = ElasticArray{T}(A)
 
-Base.convert(::Type{ElasticArray}, A::AbstractArray{T}) where {T} =
+    Base.convert(::Type{ElasticArray}, A::AbstractArray) = ElasticArray(A)
+end
+
+ElasticArray{T}(A::AbstractArray) where {T} =
+    copyto!(ElasticArray{T}(uninitialized, size(A)...), A)
+
+ElasticArray(A::AbstractArray{T}) where {T} =
     convert(ElasticArray{T}, A)
 
 
-Base.similar(::Type{ElasticArray{T}}, dims::Dims{N}) where {T,N} = ElasticArray{T}(dims...)
+Base.similar(::Type{ElasticArray{T}}, dims::Dims{N}) where {T,N} = ElasticArray{T}(uninitialized, dims...)
 
 
 Base.unsafe_convert(::Type{Ptr{T}}, A::ElasticArray{T}) where T = Base.unsafe_convert(Ptr{T}, A.data)

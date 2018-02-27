@@ -4,6 +4,8 @@ __precompile__(true)
 
 module ElasticArrays
 
+using Compat
+using Compat.Markdown
 
 include("util.jl")
 include("elasticarray.jl")
