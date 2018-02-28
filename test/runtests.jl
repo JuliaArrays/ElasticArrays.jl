@@ -2,5 +2,6 @@
 
 import Compat.Test
 Test.@testset "Package ElasticArrays" begin
+    include("util.jl")
     include("elasticarray.jl")
 end
