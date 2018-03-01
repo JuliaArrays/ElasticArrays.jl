@@ -46,8 +46,8 @@ using Compat: axes
 
 
     @testset "size, length and index style" begin
-        @test @inferred size(@inferred ElasticArray{Int}(uninitialized, 4)) == (4,)
-        @test @inferred size(@inferred ElasticArray{Int}(uninitialized, 2,3,4)) == (2,3,4)
+        @test (4,) == @inferred size(@inferred ElasticArray{Int}(uninitialized, 4))
+        @test (2,3,4) == @inferred size(@inferred ElasticArray{Int}(uninitialized, 2,3,4))
 
         test_E() do E
             @test length(E) == prod(size(E))
