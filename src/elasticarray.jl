@@ -35,6 +35,14 @@ end
 export ElasticArray
 
 
+@static if VERSION < v"0.7.0-DEV.2552"
+    @inline ElasticArray{T}(dims::Integer...) where {T} = ElasticArray{T}(uninitialized, dims...)
+else
+    Base.@deprecate(ElasticArray{T}(dims::Integer...) where {T}, ElasticArray{T}(uninitialized, dims...))
+end
+
+
+
 function _split_resize_dims(A::ElasticArray, dims::NTuple{N,Integer}) where {N}
     kernel_size, size_lastdim = _split_dims(dims)
     kernel_size != A.kernel_size && throw(ArgumentError("Can only resize last dimension of an ElasticArray"))

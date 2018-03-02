@@ -44,6 +44,13 @@ using Compat: axes
     test_comp(E::ElasticArray, V::Vector{<:Array}) =
         all(i -> @view(E[lastdim_slice_idxs(E, i)...]) == V[i], eachindex(V))
 
+    @testset "ctors" begin
+        @test (@inferred ElasticArray{Int}(uninitialized, 2, 3, 4)).kernel_size == (2, 3)
+        @test ElasticArray{Int}(uninitialized, 2, 3, 4).kernel_length == Base.MultiplicativeInverses.SignedMultiplicativeInverse(2 * 3)
+        @test size(ElasticArray{Int}(uninitialized, 2, 3, 4).data) == (2 * 3 * 4,)
+
+        @test fill!((@inferred ElasticArray{Int}(2, 3, 4)), 42) == fill!(ElasticArray{Int}(uninitialized, 2, 3, 4), 42)
+    end
 
     @testset "size, length and index style" begin
         @test (4,) == @inferred size(@inferred ElasticArray{Int}(uninitialized, 4))
