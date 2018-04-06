@@ -4,7 +4,7 @@ using Base: @propagate_inbounds
 using Base.MultiplicativeInverses: SignedMultiplicativeInverse
 
 
-@doc doc"""
+"""
     ElasticArray{T,N,M} <: DenseArray{T,N}
 
 An `ElasticArray` can grow/shrink in its last dimension. `N` is the total
