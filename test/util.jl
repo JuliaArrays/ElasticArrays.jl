@@ -1,4 +1,4 @@
-# This file is E part of BAT.jl, licensed under the MIT License (MIT).
+# This file is a part of ElasticArrays.jl, licensed under the MIT License (MIT).
 
 using ElasticArrays
 using Compat.Test
