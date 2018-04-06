@@ -12,29 +12,38 @@ using Compat: axes
     test_kernel_dims = Base.front(test_dims)
 
     function test_A(test_code)
-        A = rand!(Array{Int}(uninitialized, test_dims...), 0:99)
+        A = rand!(Array{Int}(undef, test_dims...), 0:99)
+        test_code(A)
+    end
+
+    function test_A(test_code)
+        @static if VERSION >= v"0.7.0-DEV.2552"
+            A = rand!(@test_deprecated(Array{Int}(test_dims...)), 0:99)
+        else
+            A = rand!(Array{Int}(test_dims...), 0:99)
+        end
         test_code(A)
     end
 
     function test_E(test_code)
-        E = rand!(ElasticArray{Int}(uninitialized, test_dims...), 0:99)
+        E = rand!(ElasticArray{Int}(undef, test_dims...), 0:99)
         test_code(E)
     end
 
     function test_E_A(test_code)
-        E = rand!(ElasticArray{Int}(uninitialized, test_dims...), 0:99)
-        A = rand!(Array{Int}(uninitialized, test_dims...), 0:99)
+        E = rand!(ElasticArray{Int}(undef, test_dims...), 0:99)
+        A = rand!(Array{Int}(undef, test_dims...), 0:99)
         test_code(E, A)
     end
 
     function test_E1_E2(test_code)
-        E1 = rand!(ElasticArray{Int}(uninitialized, test_dims...), 0:99)
-        E2 = rand!(ElasticArray{Int}(uninitialized, test_dims...), 0:99)
+        E1 = rand!(ElasticArray{Int}(undef, test_dims...), 0:99)
+        E2 = rand!(ElasticArray{Int}(undef, test_dims...), 0:99)
         test_code(E1, E2)
     end
 
     function test_E_V(test_code)
-        E = ElasticArray{Float64}(uninitialized, test_kernel_dims..., 0)
+        E = ElasticArray{Float64}(undef, test_kernel_dims..., 0)
         V = Vector{Array{Float64,length(test_kernel_dims)}}()
         test_code(E, V)
     end
@@ -45,16 +54,16 @@ using Compat: axes
         all(i -> @view(E[lastdim_slice_idxs(E, i)...]) == V[i], eachindex(V))
 
     @testset "ctors" begin
-        @test (@inferred ElasticArray{Int}(uninitialized, 2, 3, 4)).kernel_size == (2, 3)
-        @test ElasticArray{Int}(uninitialized, 2, 3, 4).kernel_length == Base.MultiplicativeInverses.SignedMultiplicativeInverse(2 * 3)
-        @test size(ElasticArray{Int}(uninitialized, 2, 3, 4).data) == (2 * 3 * 4,)
+        @test (@inferred ElasticArray{Int}(undef, 2, 3, 4)).kernel_size == (2, 3)
+        @test ElasticArray{Int}(undef, 2, 3, 4).kernel_length == Base.MultiplicativeInverses.SignedMultiplicativeInverse(2 * 3)
+        @test size(ElasticArray{Int}(undef, 2, 3, 4).data) == (2 * 3 * 4,)
 
-        @test fill!((@inferred ElasticArray{Int}(2, 3, 4)), 42) == fill!(ElasticArray{Int}(uninitialized, 2, 3, 4), 42)
+        @test fill!((@inferred ElasticArray{Int}(undef, 2, 3, 4)), 42) == fill!(ElasticArray{Int}(undef, 2, 3, 4), 42)
     end
 
     @testset "size, length and index style" begin
-        @test (4,) == @inferred size(@inferred ElasticArray{Int}(uninitialized, 4))
-        @test (2,3,4) == @inferred size(@inferred ElasticArray{Int}(uninitialized, 2,3,4))
+        @test (4,) == @inferred size(@inferred ElasticArray{Int}(undef, 4))
+        @test (2,3,4) == @inferred size(@inferred ElasticArray{Int}(undef, 2,3,4))
 
         test_E() do E
             @test length(E) == prod(size(E))
@@ -76,7 +85,7 @@ using Compat: axes
             @test all(i -> E[i] == A[i], CartesianIndices(size(A)))
         end
 
-        @test all(x -> x == 42, @inferred fill!(ElasticArray{Int}(uninitialized, 2,3,4), 42))
+        @test all(x -> x == 42, @inferred fill!(ElasticArray{Int}(undef, 2,3,4), 42))
     end
 
 
@@ -89,8 +98,8 @@ using Compat: axes
             @test E1 != E2
         end
 
-        @test fill!(ElasticArray{Int}(uninitialized, 2, 3, 4), 0) == fill!(ElasticArray{Int}(uninitialized, 2, 3, 4), 0)
-        @test fill!(ElasticArray{Int}(uninitialized, 2, 3, 4), 0) != fill!(ElasticArray{Int}(uninitialized, 2, 4, 3), 0)
+        @test fill!(ElasticArray{Int}(undef, 2, 3, 4), 0) == fill!(ElasticArray{Int}(undef, 2, 3, 4), 0)
+        @test fill!(ElasticArray{Int}(undef, 2, 3, 4), 0) != fill!(ElasticArray{Int}(undef, 2, 4, 3), 0)
     end
 
 
@@ -229,9 +238,9 @@ using Compat: axes
 
     @testset "basic math" begin
         T = Float64
-        E1 = rand!(ElasticArray{T}(uninitialized, 9, 9))
-        E2 = rand!(ElasticArray{T}(uninitialized, 9, 9))
-        E3 = rand!(ElasticArray{T}(uninitialized, 9, 7))
+        E1 = rand!(ElasticArray{T}(undef, 9, 9))
+        E2 = rand!(ElasticArray{T}(undef, 9, 9))
+        E3 = rand!(ElasticArray{T}(undef, 9, 7))
 
         A1 = Array(E1)
         A2 = Array(E2)

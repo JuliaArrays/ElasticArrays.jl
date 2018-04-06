@@ -20,10 +20,10 @@ struct ElasticArray{T,N,M} <: DenseArray{T,N}
     kernel_length::SignedMultiplicativeInverse{Int}
     data::Vector{T}
 
-    function ElasticArray{T}(::Uninitialized, dims::Integer...) where {T}
+    function ElasticArray{T}(::UndefInitializer, dims::Integer...) where {T}
         kernel_size, size_lastdim = _split_dims(dims)
         kernel_length = prod(kernel_size)
-        data = Vector{T}(uninitialized, kernel_length * size_lastdim)
+        data = Vector{T}(undef, kernel_length * size_lastdim)
         new{T,length(dims),length(kernel_size)}(
             kernel_size,
             SignedMultiplicativeInverse{Int}(kernel_length),
@@ -36,9 +36,9 @@ export ElasticArray
 
 
 @static if VERSION < v"0.7.0-DEV.2552"
-    @inline ElasticArray{T}(dims::Integer...) where {T} = ElasticArray{T}(uninitialized, dims...)
+    @inline ElasticArray{T}(dims::Integer...) where {T} = ElasticArray{T}(undef, dims...)
 else
-    Base.@deprecate(ElasticArray{T}(dims::Integer...) where {T}, ElasticArray{T}(uninitialized, dims...))
+    Base.@deprecate(ElasticArray{T}(dims::Integer...) where {T}, ElasticArray{T}(undef, dims...))
 end
 
 
@@ -120,13 +120,13 @@ end
 end
 
 ElasticArray{T}(A::AbstractArray) where {T} =
-    copyto!(ElasticArray{T}(uninitialized, size(A)...), A)
+    copyto!(ElasticArray{T}(undef, size(A)...), A)
 
 ElasticArray(A::AbstractArray{T}) where {T} =
     convert(ElasticArray{T}, A)
 
 
-Base.similar(::Type{ElasticArray{T}}, dims::Dims{N}) where {T,N} = ElasticArray{T}(uninitialized, dims...)
+Base.similar(::Type{ElasticArray{T}}, dims::Dims{N}) where {T,N} = ElasticArray{T}(undef, dims...)
 
 
 Base.unsafe_convert(::Type{Ptr{T}}, A::ElasticArray{T}) where T = Base.unsafe_convert(Ptr{T}, A.data)
