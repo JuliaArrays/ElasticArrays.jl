@@ -35,6 +35,15 @@ end
 export ElasticArray
 
 
+ElasticArray{T,N}(A::AbstractArray{U,N}) where {T,N,U} = copyto!(ElasticArray{T}(undef, size(A)...), A)
+ElasticArray{T}(A::AbstractArray{U,N}) where {T,N,U} = ElasticArray{T,N}(A)
+ElasticArray(A::AbstractArray{T,N}) where {T,N} = ElasticArray{T,N}(A)
+
+Base.convert(::Type{ElasticArray{T,N}}, A::AbstractArray) where {T,N} = ElasticArray{T,N}(A)
+Base.convert(::Type{ElasticArray{T}}, A::AbstractArray) where {T} = ElasticArray{T}(A)
+Base.convert(::Type{ElasticArray}, A::AbstractArray) = ElasticArray(A)
+
+
 @static if VERSION < v"0.7.0-DEV.2552"
     @inline ElasticArray{T}(dims::Integer...) where {T} = ElasticArray{T}(undef, dims...)
 else
@@ -112,18 +121,6 @@ end
 
 @inline Compat.copyto!(dest::AbstractArray, doffs::Integer, src::ElasticArray, args::Integer...) = copyto!(dest, doffs, src.data, args...)
 @inline Compat.copyto!(dest::AbstractArray, src::ElasticArray) = copyto!(dest, src.data)
-
-@static if VERSION < v"0.7.0-DEV.3138"
-    Base.convert(::Type{ElasticArray{T}}, A::AbstractArray) where {T} = ElasticArray{T}(A)
-
-    Base.convert(::Type{ElasticArray}, A::AbstractArray) = ElasticArray(A)
-end
-
-ElasticArray{T}(A::AbstractArray) where {T} =
-    copyto!(ElasticArray{T}(undef, size(A)...), A)
-
-ElasticArray(A::AbstractArray{T}) where {T} =
-    convert(ElasticArray{T}, A)
 
 
 Base.similar(::Type{ElasticArray{T}}, dims::Dims{N}) where {T,N} = ElasticArray{T}(undef, dims...)

@@ -149,6 +149,27 @@ using Compat: axes
         end
 
         test_A() do A
+            E = @inferred ElasticArray{Float32}(A)
+            @test E isa ElasticArray
+            @test E == A
+            @test eltype(E) == Float32
+        end
+
+        test_A() do A
+            E = @inferred ElasticArray{Float64,3}(A)
+            @test E isa ElasticArray
+            @test E == A
+            @test eltype(E) == Float64
+        end
+
+        test_A() do A
+            E = @inferred ElasticArray{Float32,3}(A)
+            @test E isa ElasticArray
+            @test E == A
+            @test eltype(E) == Float32
+        end
+
+        test_A() do A
             E = @inferred ElasticArray(A)
             @test E isa ElasticArray
             @test E == A
@@ -156,10 +177,31 @@ using Compat: axes
         end
 
         test_A() do A
+            E = @inferred convert(ElasticArray{Float64,3}, A)
+            @test E isa ElasticArray
+            @test E == A
+            @test eltype(E) == Float64
+        end
+
+        test_A() do A
+            E = @inferred convert(ElasticArray{Float32,3}, A)
+            @test E isa ElasticArray
+            @test E == A
+            @test eltype(E) == Float32
+        end
+
+        test_A() do A
             E = @inferred convert(ElasticArray{Float64}, A)
             @test E isa ElasticArray
             @test E == A
             @test eltype(E) == Float64
+        end
+
+        test_A() do A
+            E = @inferred convert(ElasticArray{Float32}, A)
+            @test E isa ElasticArray
+            @test E == A
+            @test eltype(E) == Float32
         end
 
         test_A() do A
