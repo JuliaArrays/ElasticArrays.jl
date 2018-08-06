@@ -67,7 +67,9 @@ using Compat: axes
 
         test_E() do E
             @test length(E) == prod(size(E))
-            @test Base._length(E) == prod(size(E))
+            @static if VERSION < v"0.7.0-beta.250"
+                @test Base._length(E) == prod(size(E))
+            end
             @test IndexStyle(E) == IndexLinear()
             @test eachindex(E) == eachindex(parent(E))
         end

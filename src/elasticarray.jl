@@ -72,7 +72,10 @@ Base.size(A::ElasticArray) = (A.kernel_size..., div(length(eachindex(A.data)), A
 @inline Base.IndexStyle(A::ElasticArray) = IndexStyle(A.data)
 
 Base.length(A::ElasticArray) = length(A.data)
-Base._length(A::ElasticArray) = Base._length(A.data)
+
+@static if VERSION < v"0.7.0-beta.250"
+    Base._length(A::ElasticArray) = Base._length(A.data)
+end
 
 @static if VERSION < v"0.7.0-DEV.2791"
     Base.repremptyarray(io::IO, X::ElasticArray{T}) where {T} = print(io, "ElasticArray{$T}(", join(size(X),','), ')')
