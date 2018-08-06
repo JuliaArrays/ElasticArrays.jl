@@ -66,7 +66,7 @@ import Base.==
 
 Base.parent(A::ElasticArray) = A.data
 
-Base.size(A::ElasticArray) = (A.kernel_size..., div(length(linearindices(A.data)), A.kernel_length))
+Base.size(A::ElasticArray) = (A.kernel_size..., div(length(eachindex(A.data)), A.kernel_length))
 @propagate_inbounds Base.getindex(A::ElasticArray, i::Integer) = getindex(A.data, i)
 @propagate_inbounds Base.setindex!(A::ElasticArray, x, i::Integer) = setindex!(A.data, x, i)
 @inline Base.IndexStyle(A::ElasticArray) = IndexStyle(A.data)
@@ -93,14 +93,14 @@ end
 
 
 function Base.append!(dest::ElasticArray, src::AbstractArray)
-    rem(length(linearindices(src)), dest.kernel_length) != 0 && throw(DimensionMismatch("Can't append, length of source array is incompatible"))
+    rem(length(eachindex(src)), dest.kernel_length) != 0 && throw(DimensionMismatch("Can't append, length of source array is incompatible"))
     append!(dest.data, src)
     dest
 end
 
 
 function Base.prepend!(dest::ElasticArray, src::AbstractArray)
-    rem(length(linearindices(src)), dest.kernel_length) != 0 && throw(DimensionMismatch("Can't prepend, length of source array is incompatible"))
+    rem(length(eachindex(src)), dest.kernel_length) != 0 && throw(DimensionMismatch("Can't prepend, length of source array is incompatible"))
     prepend!(dest.data, src)
     dest
 end
