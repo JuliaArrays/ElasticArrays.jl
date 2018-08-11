@@ -16,15 +16,6 @@ using Compat: axes
         test_code(A)
     end
 
-    function test_A(test_code)
-        @static if VERSION >= v"0.7.0-DEV.2552"
-            A = rand!(@test_deprecated(Array{Int}(test_dims...)), 0:99)
-        else
-            A = rand!(Array{Int}(test_dims...), 0:99)
-        end
-        test_code(A)
-    end
-
     function test_E(test_code)
         E = rand!(ElasticArray{Int}(undef, test_dims...), 0:99)
         test_code(E)
