@@ -66,15 +66,18 @@ import Base.==
 
 Base.parent(A::ElasticArray) = A.data
 
-Base.size(A::ElasticArray) = (A.kernel_size..., div(length(linearindices(A.data)), A.kernel_length))
+Base.size(A::ElasticArray) = (A.kernel_size..., div(length(LinearIndices(A.data)), A.kernel_length))
 @propagate_inbounds Base.getindex(A::ElasticArray, i::Integer) = getindex(A.data, i)
 @propagate_inbounds Base.setindex!(A::ElasticArray, x, i::Integer) = setindex!(A.data, x, i)
 @inline Base.IndexStyle(A::ElasticArray) = IndexStyle(A.data)
 
 Base.length(A::ElasticArray) = length(A.data)
-Base._length(A::ElasticArray) = Base._length(A.data)
 
-Base.linearindices(A::ElasticArray) = linearindices(A.data)
+@static if VERSION < v"0.7"
+    Base._length(A::ElasticArray) = Base._length(A.data)
+end
+
+Compat.LinearIndices(A::ElasticArray) = LinearIndices(A.data)
 
 @static if VERSION < v"0.7.0-DEV.2791"
     Base.repremptyarray(io::IO, X::ElasticArray{T}) where {T} = print(io, "ElasticArray{$T}(", join(size(X),','), ')')
@@ -95,14 +98,14 @@ end
 
 
 function Base.append!(dest::ElasticArray, src::AbstractArray)
-    rem(length(linearindices(src)), dest.kernel_length) != 0 && throw(DimensionMismatch("Can't append, length of source array is incompatible"))
+    rem(length(LinearIndices(src)), dest.kernel_length) != 0 && throw(DimensionMismatch("Can't append, length of source array is incompatible"))
     append!(dest.data, src)
     dest
 end
 
 
 function Base.prepend!(dest::ElasticArray, src::AbstractArray)
-    rem(length(linearindices(src)), dest.kernel_length) != 0 && throw(DimensionMismatch("Can't prepend, length of source array is incompatible"))
+    rem(length(LinearIndices(src)), dest.kernel_length) != 0 && throw(DimensionMismatch("Can't prepend, length of source array is incompatible"))
     prepend!(dest.data, src)
     dest
 end

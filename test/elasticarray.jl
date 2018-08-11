@@ -4,7 +4,7 @@ using ElasticArrays
 using Compat
 using Compat.Test
 using Compat.Random
-using Compat: axes
+using Compat: axes, LinearIndices
 
 
 @testset "elasticarray" begin
@@ -17,10 +17,14 @@ using Compat: axes
     end
 
     function test_A(test_code)
-        @static if VERSION >= v"0.7.0-DEV.2552"
-            A = rand!(@test_deprecated(Array{Int}(test_dims...)), 0:99)
+        @static if VERSION >= v"1.0.0-"
+            A = rand!(Array{Int}(undef, test_dims...), 0:99)
         else
-            A = rand!(Array{Int}(test_dims...), 0:99)
+            @static if VERSION >= v"0.7.0-DEV.2552"
+                A = rand!(@test_deprecated(Array{Int}(test_dims...)), 0:99)
+            else
+                A = rand!(Array{Int}(test_dims...), 0:99)
+            end
         end
         test_code(A)
     end
@@ -67,9 +71,8 @@ using Compat: axes
 
         test_E() do E
             @test length(E) == prod(size(E))
-            @test Base._length(E) == prod(size(E))
             @test IndexStyle(E) == IndexLinear()
-            @test linearindices(E) == linearindices(parent(E))
+            @test LinearIndices(E) == LinearIndices(parent(E))
             @test eachindex(E) == eachindex(parent(E))
         end
     end
