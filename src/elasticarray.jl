@@ -81,6 +81,10 @@ end
     Base.repremptyarray(io::IO, X::ElasticArray{T}) where {T} = print(io, "ElasticArray{$T}(", join(size(X),','), ')')
 end
 
+@static if VERSION >= v"0.7.0-DEV.4404"
+    Base.dataids(A::ElasticArray) = Base.dataids(A.data)
+end
+
 @inline function Base.resize!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N}
     kernel_size, size_lastdim = _split_resize_dims(A, dims)
     resize!(A.data, A.kernel_length.divisor * size_lastdim)
