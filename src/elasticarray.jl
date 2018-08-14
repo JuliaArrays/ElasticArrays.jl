@@ -46,7 +46,7 @@ Base.convert(::Type{ElasticArray}, A::AbstractArray) = ElasticArray(A)
 
 @static if VERSION < v"0.7.0-DEV.2552"
     @inline ElasticArray{T}(dims::Integer...) where {T} = ElasticArray{T}(undef, dims...)
-else
+elseif VERSION < v"1.0.0-"
     Base.@deprecate(ElasticArray{T}(dims::Integer...) where {T}, ElasticArray{T}(undef, dims...))
 end
 
