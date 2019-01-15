@@ -44,14 +44,6 @@ Base.convert(::Type{ElasticArray{T}}, A::AbstractArray) where {T} = ElasticArray
 Base.convert(::Type{ElasticArray}, A::AbstractArray) = ElasticArray(A)
 
 
-@static if VERSION < v"0.7.0-DEV.2552"
-    @inline ElasticArray{T}(dims::Integer...) where {T} = ElasticArray{T}(undef, dims...)
-elseif VERSION < v"1.0.0-"
-    Base.@deprecate(ElasticArray{T}(dims::Integer...) where {T}, ElasticArray{T}(undef, dims...))
-end
-
-
-
 function _split_resize_dims(A::ElasticArray, dims::NTuple{N,Integer}) where {N}
     kernel_size, size_lastdim = _split_dims(dims)
     kernel_size != A.kernel_size && throw(ArgumentError("Can only resize last dimension of an ElasticArray"))
@@ -73,17 +65,7 @@ Base.size(A::ElasticArray) = (A.kernel_size..., div(length(eachindex(A.data)), A
 
 Base.length(A::ElasticArray) = length(A.data)
 
-@static if VERSION < v"0.7.0-beta.250"
-    Base._length(A::ElasticArray) = Base._length(A.data)
-end
-
-@static if VERSION < v"0.7.0-DEV.2791"
-    Base.repremptyarray(io::IO, X::ElasticArray{T}) where {T} = print(io, "ElasticArray{$T}(", join(size(X),','), ')')
-end
-
-@static if VERSION >= v"0.7.0-DEV.4404"
-    Base.dataids(A::ElasticArray) = Base.dataids(A.data)
-end
+Base.dataids(A::ElasticArray) = Base.dataids(A.data)
 
 @inline function Base.resize!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N}
     kernel_size, size_lastdim = _split_resize_dims(A, dims)

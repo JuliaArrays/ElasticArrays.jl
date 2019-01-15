@@ -58,9 +58,6 @@ using Compat: axes
 
         test_E() do E
             @test length(E) == prod(size(E))
-            @static if VERSION < v"0.7.0-beta.250"
-                @test Base._length(E) == prod(size(E))
-            end
             @test IndexStyle(E) == IndexLinear()
             @test eachindex(E) == eachindex(parent(E))
         end
@@ -95,16 +92,14 @@ using Compat: axes
     end
 
 
-    @static if VERSION >= v"0.7.0-DEV.4404"
-        @testset "mightalias and dataids" begin
-            E1 = ElasticArray{Int}(undef, 10, 5)
-            E2 = ElasticArray{Int}(undef, 10, 5)
-            @test Base.dataids(parent(E1)) == @inferred Base.dataids(E1)
-            @test @inferred !Base.mightalias(E1, E2)
-            @test @inferred !Base.mightalias(view(E1, 2:3, 1:2), view(E1, 4:5, 1:2))
-            @test @inferred Base.mightalias(view(E1, 2:4, 1:2), view(E1, 3:5, 1:2))
-            @test @inferred !Base.mightalias(view(E1, 2:4, 1:2), view(E2, 3:5, 1:2))
-        end
+    @testset "mightalias and dataids" begin
+        E1 = ElasticArray{Int}(undef, 10, 5)
+        E2 = ElasticArray{Int}(undef, 10, 5)
+        @test Base.dataids(parent(E1)) == @inferred Base.dataids(E1)
+        @test @inferred !Base.mightalias(E1, E2)
+        @test @inferred !Base.mightalias(view(E1, 2:3, 1:2), view(E1, 4:5, 1:2))
+        @test @inferred Base.mightalias(view(E1, 2:4, 1:2), view(E1, 3:5, 1:2))
+        @test @inferred !Base.mightalias(view(E1, 2:4, 1:2), view(E2, 3:5, 1:2))
     end
 
 
