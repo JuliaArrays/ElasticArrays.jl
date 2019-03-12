@@ -13,7 +13,7 @@ only in its last dimension:
 
 using ElasticArrays
 
-A = ElasticArray{Int}(2, 3, 0)
+A = ElasticArray{Int}(undef, 2, 3, 0)
 
 for i in 1:4
     append!(A, rand(0:99, 2, 3))
