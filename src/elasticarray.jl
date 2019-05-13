@@ -39,8 +39,22 @@ ElasticArray{T,N}(A::AbstractArray{U,N}) where {T,N,U} = copyto!(ElasticArray{T}
 ElasticArray{T}(A::AbstractArray{U,N}) where {T,N,U} = ElasticArray{T,N}(A)
 ElasticArray(A::AbstractArray{T,N}) where {T,N} = ElasticArray{T,N}(A)
 
+function ElasticArray{T,N,M}(A::AbstractArray) where {T,N,M}
+    M == N - 1 || throw(ArgumentError("ElasticArray{T,N=$N,M=$M} does not satisfy requirement M == N-1"))
+    ElasticArray{T,N}(A)
+end
+
+
+Base.convert(::Type{ElasticArray{T,N,M}}, A::ElasticArray{T,N,M}) where {T,N,M} = A
+Base.convert(::Type{ElasticArray{T,N,M}}, A::AbstractArray) where {T,N,M} = ElasticArray{T,N,M}(A)
+
+Base.convert(::Type{ElasticArray{T,N}}, A::ElasticArray{T,N}) where {T,N} = A
 Base.convert(::Type{ElasticArray{T,N}}, A::AbstractArray) where {T,N} = ElasticArray{T,N}(A)
+
+Base.convert(::Type{ElasticArray{T}}, A::ElasticArray{T}) where {T} = A
 Base.convert(::Type{ElasticArray{T}}, A::AbstractArray) where {T} = ElasticArray{T}(A)
+
+Base.convert(::Type{ElasticArray}, A::ElasticArray) = A
 Base.convert(::Type{ElasticArray}, A::AbstractArray) = ElasticArray(A)
 
 
