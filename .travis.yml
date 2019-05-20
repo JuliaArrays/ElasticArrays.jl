@@ -1,36 +1,27 @@
 ## Documentation: http://docs.travis-ci.com/user/languages/julia/
+
 language: julia
+
 os:
   - linux
   - osx
+
 julia:
-  - 1.0
   - 1.1
   - nightly
-notifications:
-  email: false
-git:
-  depth: 99999999
 
 ## uncomment the following lines to allow failures on nightly julia
 ## (tests will run but not make your overall status red)
 #matrix:
 #  allow_failures:
-#  - julia: nightly
+#    - julia: nightly
+#  fast_finish: true
 
-## uncomment and modify the following lines to manually install system packages
-#addons:
-#  apt: # apt-get for linux
-#    packages:
-#    - gfortran
-#before_script: # homebrew for mac
-#  - if [ $TRAVIS_OS_NAME = osx ]; then brew install gcc; fi
+notifications:
+  email: false
 
-## uncomment the following lines to override the default test script
-#script:
-#  - julia -e 'VERSION >= v"0.7-" && import Pkg; if VERSION < v"0.7.0-DEV.5183" ; Pkg.clone(pwd()) ; else; Pkg.up(); end ; Pkg.test("ElasticArrays"; coverage=true)'
 after_success:
-  # push coverage results to Coveralls
-  - julia -e 'VERSION >= v"0.7-" && import Pkg; cd(Pkg.dir("ElasticArrays")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
   # push coverage results to Codecov
-  - julia -e 'VERSION >= v"0.7-" && import Pkg; cd(Pkg.dir("ElasticArrays")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+  - julia -e 'import Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+  # push coverage results to Coveralls
+  - julia -e 'import Pkg; Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'

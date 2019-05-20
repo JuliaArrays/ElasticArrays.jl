@@ -1,11 +1,7 @@
 # This file is a part of ElasticArrays.jl, licensed under the MIT License (MIT).
 
 using ElasticArrays
-using Compat
-using Compat.Test
-using Compat.Random
-using Compat: axes
-
+using Test
 
 @testset "elasticarray" begin
     test_dims = (3, 2, 4)

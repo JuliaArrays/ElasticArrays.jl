@@ -1,8 +1,7 @@
 # This file is a part of ElasticArrays.jl, licensed under the MIT License (MIT).
 
 using ElasticArrays
-using Compat.Test
-
+using Test
 
 @testset "util" begin
     @testset "_split_dims" begin
