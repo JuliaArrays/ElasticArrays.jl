@@ -3,6 +3,8 @@
 using ElasticArrays
 using Test
 
+using Random
+
 @testset "elasticarray" begin
     test_dims = (3, 2, 4)
     test_kernel_dims = Base.front(test_dims)
