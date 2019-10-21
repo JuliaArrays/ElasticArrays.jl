@@ -1,6 +1,6 @@
 name = "ElasticArrays"
 uuid = "fdbdab4c-e67f-52f5-8c3f-e7b388dad3d4"
-version = "0.4.0"
+version = "1.0.0"
 
 [deps]
 
