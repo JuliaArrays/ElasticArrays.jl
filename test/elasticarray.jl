@@ -225,7 +225,7 @@ using Random
             @test eltype(E) == eltype(A)
         end
 
-        @test typeof(@inferred similar(ElasticArray{Int}, (2,3,4))) == ElasticArray{Int,3,2}
+        @test typeof(@inferred similar(ElasticArray{Int}, (2,3,4))) == ElasticArray{Int,3,2,Vector{Int}}
         @test size(@inferred similar(ElasticArray{Int}, (2,3,4))) == (2,3,4)
     end
 
