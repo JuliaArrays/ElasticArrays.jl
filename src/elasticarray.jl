@@ -15,25 +15,25 @@ Constructors:
     ElasticArray{T}(dims::Integer...)
     convert(ElasticArray, A::AbstractArray)
 """
-struct ElasticArray{T,N,M} <: DenseArray{T,N}
+struct ElasticArray{T,N,M,V<:DenseVector{T}} <: DenseArray{T,N}
     kernel_size::NTuple{M,Int}
     kernel_length::SignedMultiplicativeInverse{Int}
-    data::Vector{T}
-
-    function ElasticArray{T}(::UndefInitializer, dims::Integer...) where {T}
-        kernel_size, size_lastdim = _split_dims(dims)
-        kernel_length = prod(kernel_size)
-        data = Vector{T}(undef, kernel_length * size_lastdim)
-        new{T,length(dims),length(kernel_size)}(
-            kernel_size,
-            SignedMultiplicativeInverse{Int}(kernel_length),
-            data
-        )
-    end
+    data::V
 end
 
 export ElasticArray
 
+
+function ElasticArray{T}(::UndefInitializer, dims::Integer...) where {T}
+  kernel_size, size_lastdim = _split_dims(dims)
+  kernel_length = prod(kernel_size)
+  data = Vector{T}(undef, kernel_length * size_lastdim)
+  ElasticArray{T,length(dims),length(kernel_size),Vector{T}}(
+      kernel_size,
+      SignedMultiplicativeInverse{Int}(kernel_length),
+      data
+  )
+end
 
 ElasticArray{T,N}(A::AbstractArray{U,N}) where {T,N,U} = copyto!(ElasticArray{T}(undef, size(A)...), A)
 ElasticArray{T}(A::AbstractArray{U,N}) where {T,N,U} = ElasticArray{T,N}(A)
@@ -43,6 +43,8 @@ function ElasticArray{T,N,M}(A::AbstractArray) where {T,N,M}
     M == N - 1 || throw(ArgumentError("ElasticArray{T,N=$N,M=$M} does not satisfy requirement M == N-1"))
     ElasticArray{T,N}(A)
 end
+
+ElasticArray(kernel_size::NTuple{M,Int}, kernel_length::SignedMultiplicativeInverse{Int}, data::V) where {T,M,V<:DenseVector{T}} = ElasticArray{T,M+1,M,V}(kernel_size, kernel_length, data)
 
 
 Base.convert(::Type{ElasticArray{T,N,M}}, A::ElasticArray{T,N,M}) where {T,N,M} = A
