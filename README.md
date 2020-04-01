@@ -1,8 +1,8 @@
 # ElasticArrays.jl
 
-[![Build Status](https://travis-ci.org/JuliaArrays/ElasticArrays.jl.svg?branch=master)](https://travis-ci.org/JuliaArrays/ElasticArrays.jl)
-[![Build status](https://ci.appveyor.com/api/projects/status/eh9ig43fn2f4rjh8/branch/master?svg=true)](https://ci.appveyor.com/project/JuliaArrays/elasticarrays-jl/branch/master)
-[![codecov](https://codecov.io/gh/JuliaArrays/ElasticArrays.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaArrays/ElasticArrays.jl)
+[![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](LICENSE.md)
+[![Build Status](https://travis-ci.com/JuliaArrays/ElasticArrays.jl.svg?branch=master)](https://travis-ci.com/JuliaArrays/ElasticArrays.jl)
+[![Codecov](https://codecov.io/gh/JuliaArrays/ElasticArrays.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaArrays/ElasticArrays.jl)
 
 ElasticArrays provides resizeable multidimensional arrays for Julia.
 
