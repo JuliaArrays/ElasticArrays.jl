@@ -57,11 +57,9 @@ ElasticArray(A::AbstractArray{T,N}) where {T,N} = copyto!(ElasticArray{T,N}(unde
 Base.convert(::Type{T}, A::AbstractArray) where {T<:ElasticArray} = A isa T ? A : T(A)
 
 
-
-
-import Base.==
-(==)(A::ElasticArray, B::ElasticArray) =
+function Base.:(==)(A::ElasticArray, B::ElasticArray)
     ndims(A) == ndims(B) && A.kernel_size == B.kernel_size && A.data == B.data
+end
 
 
 Base.parent(A::ElasticArray) = A.data
