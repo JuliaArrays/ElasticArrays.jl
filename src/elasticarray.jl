@@ -60,14 +60,14 @@ Base.convert(::Type{T}, A::AbstractArray) where {T<:ElasticArray} = A isa T ? A 
 Base.similar(::Type{ElasticArray{T}}, dims::Dims{N}) where {T,N} = ElasticArray{T}(undef, dims...)
 
 
-function Base.:(==)(A::ElasticArray, B::ElasticArray)
+@inline function Base.:(==)(A::ElasticArray, B::ElasticArray)
     return ndims(A) == ndims(B) && A.kernel_size == B.kernel_size && A.data == B.data
 end
 
 
-Base.size(A::ElasticArray) = (A.kernel_size..., div(length(eachindex(A.data)), A.kernel_length))
+@inline Base.size(A::ElasticArray) = (A.kernel_size..., div(length(eachindex(A.data)), A.kernel_length))
 
-Base.length(A::ElasticArray) = length(A.data)
+@inline Base.length(A::ElasticArray) = length(A.data)
 
 @propagate_inbounds Base.getindex(A::ElasticArray, i::Int) = getindex(A.data, i)
 
@@ -111,7 +111,7 @@ end
 @inline function Base.copyto!(
     dest::ElasticArray,
     doffs::Integer,
-    src::AbsArr,
+    src::AbstractArray,
     soffs::Integer,
     N::Integer,
 )
@@ -119,7 +119,7 @@ end
     return dest
 end
 @inline function Base.copyto!(
-    dest::AbsArr,
+    dest::AbstractArray,
     doffs::Integer,
     src::ElasticArray,
     soffs::Integer,
@@ -128,8 +128,8 @@ end
     copyto!(dest, doffs, src.data, soffs, N)
 end
 
-@inline Base.copyto!(dest::ElasticArray, src::AbsArr) = (copyto!(dest.data, src); dest)
-@inline Base.copyto!(dest::AbsArr, src::ElasticArray) = copyto!(dest, src.data)
+@inline Base.copyto!(dest::ElasticArray, src::AbstractArray) = (copyto!(dest.data, src); dest)
+@inline Base.copyto!(dest::AbstractArray, src::ElasticArray) = copyto!(dest, src.data)
 
 @inline function Base.copyto!(
     dest::ElasticArray,
@@ -147,10 +147,10 @@ end
 end
 
 
-Base.dataids(A::ElasticArray) = Base.dataids(A.data)
+@inline Base.dataids(A::ElasticArray) = Base.dataids(A.data)
 
-Base.parent(A::ElasticArray) = A.data
+@inline Base.parent(A::ElasticArray) = A.data
 
-Base.unsafe_convert(::Type{Ptr{T}}, A::ElasticArray{T}) where T = Base.unsafe_convert(Ptr{T}, A.data)
+@inline Base.unsafe_convert(::Type{Ptr{T}}, A::ElasticArray{T}) where T = Base.unsafe_convert(Ptr{T}, A.data)
 
-Base.pointer(A::ElasticArray, i::Integer) = pointer(A.data, i)
+@inline Base.pointer(A::ElasticArray, i::Integer) = pointer(A.data, i)
