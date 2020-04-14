@@ -57,12 +57,17 @@ ElasticArray(A::AbstractArray{T,N}) where {T,N} = copyto!(ElasticArray{T,N}(unde
 Base.convert(::Type{T}, A::AbstractArray) where {T<:ElasticArray} = A isa T ? A : T(A)
 
 
+Base.similar(::Type{ElasticArray{T}}, dims::Dims{N}) where {T,N} = ElasticArray{T}(undef, dims...)
+
+
 function Base.:(==)(A::ElasticArray, B::ElasticArray)
-    ndims(A) == ndims(B) && A.kernel_size == B.kernel_size && A.data == B.data
+    return ndims(A) == ndims(B) && A.kernel_size == B.kernel_size && A.data == B.data
 end
 
 
 Base.size(A::ElasticArray) = (A.kernel_size..., div(length(eachindex(A.data)), A.kernel_length))
+
+Base.length(A::ElasticArray) = length(A.data)
 
 @propagate_inbounds Base.getindex(A::ElasticArray, i::Int) = getindex(A.data, i)
 
@@ -70,40 +75,37 @@ Base.size(A::ElasticArray) = (A.kernel_size..., div(length(eachindex(A.data)), A
 
 Base.IndexStyle(::Type{<:ElasticArray}) = IndexLinear()
 
-Base.length(A::ElasticArray) = length(A.data)
-
-
 
 @inline function Base.resize!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N}
     kernel_size, size_lastdim = _split_resize_dims(A, dims)
     resize!(A.data, A.kernel_length.divisor * size_lastdim)
-    A
+    return A
 end
 
 @inline function Base.sizehint!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N}
     kernel_size, size_lastdim = _split_resize_dims(A, dims)
     sizehint!(A.data, A.kernel_length.divisor * size_lastdim)
-    A
+    return A
 end
 
 function _split_resize_dims(A::ElasticArray, dims::NTuple{N,Integer}) where {N}
     kernel_size, size_lastdim = _split_dims(dims)
     kernel_size != A.kernel_size && throw(ArgumentError("Can only resize last dimension of an ElasticArray"))
-    kernel_size, size_lastdim
+    return kernel_size, size_lastdim
 end
 
 
 function Base.append!(dest::ElasticArray, src::AbstractArray)
     rem(length(eachindex(src)), dest.kernel_length) != 0 && throw(DimensionMismatch("Can't append, length of source array is incompatible"))
     append!(dest.data, src)
-    dest
+    return dest
 end
 
 
 function Base.prepend!(dest::ElasticArray, src::AbstractArray)
     rem(length(eachindex(src)), dest.kernel_length) != 0 && throw(DimensionMismatch("Can't prepend, length of source array is incompatible"))
     prepend!(dest.data, src)
-    dest
+    return dest
 end
 
 
@@ -121,8 +123,6 @@ end
 @inline Base.copyto!(dest::AbstractArray, doffs::Integer, src::ElasticArray, args::Integer...) = copyto!(dest, doffs, src.data, args...)
 @inline Base.copyto!(dest::AbstractArray, src::ElasticArray) = copyto!(dest, src.data)
 
-
-Base.similar(::Type{ElasticArray{T}}, dims::Dims{N}) where {T,N} = ElasticArray{T}(undef, dims...)
 
 
 Base.dataids(A::ElasticArray) = Base.dataids(A.data)
