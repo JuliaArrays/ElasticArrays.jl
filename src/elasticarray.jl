@@ -64,9 +64,9 @@ end
 
 Base.size(A::ElasticArray) = (A.kernel_size..., div(length(eachindex(A.data)), A.kernel_length))
 
-@propagate_inbounds Base.getindex(A::ElasticArray, i::Integer) = getindex(A.data, i)
+@propagate_inbounds Base.getindex(A::ElasticArray, i::Int) = getindex(A.data, i)
 
-@propagate_inbounds Base.setindex!(A::ElasticArray, x, i::Integer) = setindex!(A.data, x, i)
+@propagate_inbounds Base.setindex!(A::ElasticArray, x, i::Int) = setindex!(A.data, x, i)
 
 Base.IndexStyle(::Type{<:ElasticArray}) = IndexLinear()
 
