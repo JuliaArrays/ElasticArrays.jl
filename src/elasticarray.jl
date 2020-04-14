@@ -76,13 +76,15 @@ end
 Base.IndexStyle(::Type{<:ElasticArray}) = IndexLinear()
 
 
-@inline function Base.resize!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N}
+@inline Base.resize!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N} = resize!(A, dims)
+@inline function Base.resize!(A::ElasticArray{T,N}, dims::NTuple{N,Integer}) where {T,N}
     kernel_size, size_lastdim = _split_resize_dims(A, dims)
     resize!(A.data, A.kernel_length.divisor * size_lastdim)
     return A
 end
 
-@inline function Base.sizehint!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N}
+@inline Base.sizehint!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N} = sizehint!(A, dims)
+@inline function Base.sizehint!(A::ElasticArray{T,N}, dims::NTuple{N,Integer}) where {T,N}
     kernel_size, size_lastdim = _split_resize_dims(A, dims)
     sizehint!(A.data, A.kernel_length.divisor * size_lastdim)
     return A
