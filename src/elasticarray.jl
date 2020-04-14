@@ -62,16 +62,16 @@ function Base.:(==)(A::ElasticArray, B::ElasticArray)
 end
 
 
-Base.parent(A::ElasticArray) = A.data
-
 Base.size(A::ElasticArray) = (A.kernel_size..., div(length(eachindex(A.data)), A.kernel_length))
+
 @propagate_inbounds Base.getindex(A::ElasticArray, i::Integer) = getindex(A.data, i)
+
 @propagate_inbounds Base.setindex!(A::ElasticArray, x, i::Integer) = setindex!(A.data, x, i)
+
 @inline Base.IndexStyle(A::ElasticArray) = IndexStyle(A.data)
 
 Base.length(A::ElasticArray) = length(A.data)
 
-Base.dataids(A::ElasticArray) = Base.dataids(A.data)
 
 
 @inline function Base.resize!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N}
@@ -124,6 +124,10 @@ end
 
 Base.similar(::Type{ElasticArray{T}}, dims::Dims{N}) where {T,N} = ElasticArray{T}(undef, dims...)
 
+
+Base.dataids(A::ElasticArray) = Base.dataids(A.data)
+
+Base.parent(A::ElasticArray) = A.data
 
 Base.unsafe_convert(::Type{Ptr{T}}, A::ElasticArray{T}) where T = Base.unsafe_convert(Ptr{T}, A.data)
 
