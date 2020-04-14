@@ -103,9 +103,23 @@ function Base.append!(dest::ElasticArray, src::AbstractArray)
     return dest
 end
 
+function Base.append!(dest::ElasticArray, iter)
+    for el in iter
+        append!(dest, el)
+    end
+    return dest
+end
+
 function Base.prepend!(dest::ElasticArray, src::AbstractArray)
     rem(length(eachindex(src)), dest.kernel_length) != 0 && throw(DimensionMismatch("Can't prepend, length of source array is incompatible"))
     prepend!(dest.data, src)
+    return dest
+end
+
+function Base.prepend!(dest::ElasticArray, iter)
+    for el in iter
+        prepend!(dest, el)
+    end
     return dest
 end
 

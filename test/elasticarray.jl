@@ -289,6 +289,26 @@ using Random
             @test size(E) == (dims..., length(V))
             @test test_comp(E, V)
         end
+
+        test_E_V() do E, V
+            dims = Base.front(size(E))
+            for i in 1:4
+                push!(V, rand(dims...))
+            end
+            @inferred append!(E, (el for el in V))
+            @test size(E) == (dims..., length(V))
+            @test test_comp(E, V)
+        end
+
+        test_E_V() do E, V
+            dims = Base.front(size(E))
+            for i in 1:4
+                pushfirst!(V, rand(dims...))
+            end
+            @inferred prepend!(E, (el for el in reverse(V)))
+            @test size(E) == (dims..., length(V))
+            @test test_comp(E, V)
+        end
     end
 
 
