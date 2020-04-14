@@ -76,25 +76,41 @@ end
 Base.IndexStyle(::Type{<:ElasticArray}) = IndexLinear()
 
 
+
 @inline Base.resize!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N} = resize!(A, dims)
+
 @inline function Base.resize!(A::ElasticArray{T,N}, dims::NTuple{N,Integer}) where {T,N}
-    kernel_size, size_lastdim = _split_resize_dims(A, dims)
+    _, size_lastdim = _split_resize_dims(A, dims)
     resize!(A.data, A.kernel_length.divisor * size_lastdim)
     return A
 end
 
+@inline function Base.resize!(A::ElasticArray, size_lastdim::Integer)
+    resize!(A.data, A.kernel_length.divisor * size_lastdim)
+    return A
+end
+
+
 @inline Base.sizehint!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N} = sizehint!(A, dims)
+
 @inline function Base.sizehint!(A::ElasticArray{T,N}, dims::NTuple{N,Integer}) where {T,N}
-    kernel_size, size_lastdim = _split_resize_dims(A, dims)
+    _, size_lastdim = _split_resize_dims(A, dims)
     sizehint!(A.data, A.kernel_length.divisor * size_lastdim)
     return A
 end
+
+@inline function Base.sizehint!(A::ElasticArray, size_lastdim::Integer)
+    sizehint!(A.data, A.kernel_length.divisor * size_lastdim)
+    return A
+end
+
 
 function _split_resize_dims(A::ElasticArray, dims::NTuple{N,Integer}) where {N}
     kernel_size, size_lastdim = _split_dims(dims)
     kernel_size != A.kernel_size && throw(ArgumentError("Can only resize last dimension of an ElasticArray"))
     return kernel_size, size_lastdim
 end
+
 
 
 function Base.append!(dest::ElasticArray, src::AbstractArray)

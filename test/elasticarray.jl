@@ -258,6 +258,23 @@ using Random
         resize_test(0)
         resize_test(2)
         resize_test(-2)
+
+
+        function resize_lastdim_test(delta::Integer)
+            test_E() do E
+                A = Array(deepcopy(E))
+                new_size = (Base.front(size(E))..., size(E, ndims(E)) + delta)
+                cmp_idxs = (Base.front(axes(E))..., 1:(last(size(E)) + min(0, delta)))
+                @test E === @inferred sizehint!(E, size(E, ndims(E)) + delta)
+                @test E === @inferred resize!(E, size(E, ndims(E)) + delta)
+                @test size(E) == new_size
+                @test E[cmp_idxs...] == A[cmp_idxs...]
+            end
+        end
+
+        resize_lastdim_test(0)
+        resize_lastdim_test(2)
+        resize_lastdim_test(-2)
     end
 
 
