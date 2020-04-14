@@ -101,7 +101,6 @@ function Base.append!(dest::ElasticArray, src::AbstractArray)
     return dest
 end
 
-
 function Base.prepend!(dest::ElasticArray, src::AbstractArray)
     rem(length(eachindex(src)), dest.kernel_length) != 0 && throw(DimensionMismatch("Can't prepend, length of source array is incompatible"))
     prepend!(dest.data, src)
@@ -109,20 +108,43 @@ function Base.prepend!(dest::ElasticArray, src::AbstractArray)
 end
 
 
-@inline function _copyto_impl!(dest::ElasticArray, args...)
-    copyto!(dest.data, args...)
-    dest
+@inline function Base.copyto!(
+    dest::ElasticArray,
+    doffs::Integer,
+    src::AbsArr,
+    soffs::Integer,
+    N::Integer,
+)
+    copyto!(dest.data, doffs, src, soffs, N)
+    return dest
+end
+@inline function Base.copyto!(
+    dest::AbsArr,
+    doffs::Integer,
+    src::ElasticArray,
+    soffs::Integer,
+    N::Integer,
+)
+    copyto!(dest, doffs, src.data, soffs, N)
 end
 
-@inline Base.copyto!(dest::ElasticArray, doffs::Integer, src::AbstractArray, args::Integer...) = _copyto_impl!(dest, doffs, src, args...)
-@inline Base.copyto!(dest::ElasticArray, src::AbstractArray) = _copyto_impl!(dest, src)
+@inline Base.copyto!(dest::ElasticArray, src::AbsArr) = (copyto!(dest.data, src); dest)
+@inline Base.copyto!(dest::AbsArr, src::ElasticArray) = copyto!(dest, src.data)
 
-@inline Base.copyto!(dest::ElasticArray, doffs::Integer, src::ElasticArray, args::Integer...) = _copyto_impl!(dest, doffs, src, args...)
-@inline Base.copyto!(dest::ElasticArray, src::ElasticArray) = _copyto_impl!(dest, src)
-
-@inline Base.copyto!(dest::AbstractArray, doffs::Integer, src::ElasticArray, args::Integer...) = copyto!(dest, doffs, src.data, args...)
-@inline Base.copyto!(dest::AbstractArray, src::ElasticArray) = copyto!(dest, src.data)
-
+@inline function Base.copyto!(
+    dest::ElasticArray,
+    doffs::Integer,
+    src::ElasticArray,
+    soffs::Integer,
+    N::Integer,
+)
+    copyto!(dest.data, doffs, src.data, soffs, N)
+    return dest
+end
+@inline function Base.copyto!(dest::ElasticArray, src::ElasticArray)
+    copyto!(dest.data, src.data)
+    return dest
+end
 
 
 Base.dataids(A::ElasticArray) = Base.dataids(A.data)
