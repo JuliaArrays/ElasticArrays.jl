@@ -307,24 +307,22 @@ using Random
             @test test_comp(E, V)
         end
 
-        test_E_V() do E, V
-            dims = Base.front(size(E))
-            for i in 1:4
-                push!(V, rand(dims...))
-            end
+        test_E() do E
+            kernel_size = Base.front(size(E))
+            kernel_length = last(size(E))
+            V = rand(Int, prod(kernel_size))
             @inferred append!(E, (el for el in V))
-            @test size(E) == (dims..., length(V))
-            @test test_comp(E, V)
+            @test size(E) == (kernel_size..., kernel_length + 1)
+            @test vec(E[:, :, kernel_length + 1]) == V
         end
 
-        test_E_V() do E, V
-            dims = Base.front(size(E))
-            for i in 1:4
-                pushfirst!(V, rand(dims...))
-            end
-            @inferred prepend!(E, (el for el in reverse(V)))
-            @test size(E) == (dims..., length(V))
-            @test test_comp(E, V)
+        test_E() do E
+            kernel_size = Base.front(size(E))
+            kernel_length = last(size(E))
+            V = rand(Int, prod(kernel_size))
+            @inferred prepend!(E, (el for el in V))
+            @test size(E) == (kernel_size..., kernel_length + 1)
+            @test vec(E[:, :, 1]) == V
         end
     end
 

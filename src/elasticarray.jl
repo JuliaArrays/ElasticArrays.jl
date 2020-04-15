@@ -112,31 +112,23 @@ function _split_resize_dims(A::ElasticArray, dims::NTuple{N,Integer}) where {N}
 end
 
 
-
-function Base.append!(dest::ElasticArray, src::AbstractArray)
-    rem(length(eachindex(src)), dest.kernel_length) != 0 && throw(DimensionMismatch("Can't append, length of source array is incompatible"))
-    append!(dest.data, src)
-    return dest
-end
-
 function Base.append!(dest::ElasticArray, iter)
-    for el in iter
-        append!(dest, el)
-    end
-    return dest
-end
-
-function Base.prepend!(dest::ElasticArray, src::AbstractArray)
-    rem(length(eachindex(src)), dest.kernel_length) != 0 && throw(DimensionMismatch("Can't prepend, length of source array is incompatible"))
-    prepend!(dest.data, src)
+    append!(dest.data, iter)
+    _check_size(dest)
     return dest
 end
 
 function Base.prepend!(dest::ElasticArray, iter)
-    for el in iter
-        prepend!(dest, el)
-    end
+    prepend!(dest.data, iter)
+    _check_size(dest)
     return dest
+end
+
+@inline function _check_size(A::ElasticArray)
+    if rem(length(eachindex(A.data)), A.kernel_length) != 0
+        throw(DimensionMismatch("Can't append, length of source array is incompatible"))
+    end
+    nothing
 end
 
 
@@ -186,3 +178,5 @@ end
 @inline Base.unsafe_convert(::Type{Ptr{T}}, A::ElasticArray{T}) where T = Base.unsafe_convert(Ptr{T}, A.data)
 
 @inline Base.pointer(A::ElasticArray, i::Integer) = pointer(A.data, i)
+
+
