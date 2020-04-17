@@ -67,7 +67,7 @@ using Random
             for i in eachindex(E, A)
                 E[i] = A[i]
             end
-            @test parent(E) == A[:]
+            @test parent(E) == A
             @test all(i -> E[i] == A[i], eachindex(E, A))
             @test all(i -> E[i] == A[i], CartesianIndices(size(A)))
         end
@@ -337,20 +337,21 @@ using Random
         A2 = Array(E2)
         A3 = Array(E3)
 
-        @test @inferred(2 * E1) isa Array{T,2}
+        @test @inferred(2 * E1) isa ElasticArray{T,2}
         @test 2 * E1 == 2 * A1
 
-        @test @inferred(E1 .+ 2) isa Array{T,2}
+        @test @inferred(E1 .+ 2) isa ElasticArray{T,2}
         @test E1 .+ 2 == A1 .+ 2
 
-        @test @inferred(E1 + E2) isa Array{T,2}
+        @test @inferred(E1 + E2) isa ElasticArray{T,2}
         @test E1 + E2 == A1 + A2
 
-        @test @inferred(E1 * E2) isa Array{T,2}
+        @test @inferred(E1 * E2) isa ElasticArray{T,2}
         @test E1 * E2 == A1 * A2
         @test E1 * E3 == A1 * A3
 
         @test E1^3 == A1^3
         @test inv(E1) == inv(A1)
+        @test inv(E1) isa ElasticArray{T,2}
     end
 end

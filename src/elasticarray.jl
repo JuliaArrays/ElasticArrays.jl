@@ -1,7 +1,9 @@
 # This file is a part of ElasticArrays.jl, licensed under the MIT License (MIT).
 
+using Adapt
 using Base: @propagate_inbounds
 using Base.MultiplicativeInverses: SignedMultiplicativeInverse
+using Base.Broadcast: Broadcast, ArrayStyle, Broadcasted
 
 export ElasticArray
 
@@ -32,6 +34,14 @@ struct ElasticArray{T,N,M,V<:DenseVector{T}} <: DenseArray{T,N}
     end
 end
 
+function ElasticArray{T,N,M}(kernel_size, kernel_length, data) where {T,N,M}
+    ElasticArray{T,N,M,typeof(data)}(kernel_size, kernel_length, data)
+end
+function ElasticArray{T,N}(kernel_size, kernel_length, data) where {T,N,M}
+    ElasticArray{T,N,N-1}(kernel_size, kernel_length, data)
+end
+
+
 
 function ElasticArray{T,N,M,V}(::UndefInitializer, dims::NTuple{N,Integer}) where {T,N,M,V}
     kernel_size, size_lastdim = _split_dims(dims)
@@ -57,8 +67,12 @@ ElasticArray(A::AbstractArray{T,N}) where {T,N} = copyto!(ElasticArray{T,N}(unde
 Base.convert(::Type{T}, A::AbstractArray) where {T<:ElasticArray} = A isa T ? A : T(A)
 
 
-Base.similar(::Type{ElasticArray{T}}, dims::Dims{N}) where {T,N} = ElasticArray{T}(undef, dims...)
-
+@inline function Base.similar(A::ElasticArray, ::Type{T}, dims::Dims{N}) where {T,N}
+    kernel_size, size_lastdim = _split_dims(dims)
+    kernel_length = prod(kernel_size)
+    data = similar(A.data, T, prod(dims))
+    ElasticArray{T,N}(kernel_size, SignedMultiplicativeInverse{Int}(kernel_length), data)
+end
 
 @inline function Base.:(==)(A::ElasticArray, B::ElasticArray)
     return ndims(A) == ndims(B) && A.kernel_size == B.kernel_size && A.data == B.data
@@ -173,8 +187,19 @@ end
 
 @inline Base.dataids(A::ElasticArray) = Base.dataids(A.data)
 
-@inline Base.parent(A::ElasticArray) = A.data
-
 @inline Base.unsafe_convert(::Type{Ptr{T}}, A::ElasticArray{T}) where T = Base.unsafe_convert(Ptr{T}, A.data)
 
 @inline Base.pointer(A::ElasticArray, i::Integer) = pointer(A.data, i)
+
+
+Broadcast.BroadcastStyle(::Type{<:ElasticArray}) = ArrayStyle{ElasticArray}()
+
+function Base.similar(bc::Broadcasted{ArrayStyle{ElasticArray}}, ::Type{T}) where {T}
+    similar(ElasticArray{T}, axes(bc))
+end
+
+
+function Adapt.adapt_structure(to, A::ElasticArray{<:Any,N,M}) where {N,M}
+    data = adapt(to, A.data)
+    ElasticArray{eltype(data),N,M,typeof(data)}(A.kernel_size, A.kernel_length, data)
+end
