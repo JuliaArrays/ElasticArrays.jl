@@ -85,7 +85,7 @@ Base.IndexStyle(::Type{<:ElasticArray}) = IndexLinear()
     return A
 end
 
-@inline function Base.resize!(A::ElasticArray, size_lastdim::Integer)
+@inline function resize_lastdim!(A::ElasticArray, size_lastdim::Integer)
     resize!(A.data, A.kernel_length.divisor * size_lastdim)
     return A
 end
@@ -99,7 +99,7 @@ end
     return A
 end
 
-@inline function Base.sizehint!(A::ElasticArray, size_lastdim::Integer)
+@inline function sizehint_lastdim!(A::ElasticArray, size_lastdim::Integer)
     sizehint!(A.data, A.kernel_length.divisor * size_lastdim)
     return A
 end
@@ -178,5 +178,3 @@ end
 @inline Base.unsafe_convert(::Type{Ptr{T}}, A::ElasticArray{T}) where T = Base.unsafe_convert(Ptr{T}, A.data)
 
 @inline Base.pointer(A::ElasticArray, i::Integer) = pointer(A.data, i)
-
-
