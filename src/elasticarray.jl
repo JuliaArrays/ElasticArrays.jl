@@ -57,76 +57,124 @@ ElasticArray(A::AbstractArray{T,N}) where {T,N} = copyto!(ElasticArray{T,N}(unde
 Base.convert(::Type{T}, A::AbstractArray) where {T<:ElasticArray} = A isa T ? A : T(A)
 
 
+Base.similar(::Type{ElasticArray{T}}, dims::Dims{N}) where {T,N} = ElasticArray{T}(undef, dims...)
 
 
-import Base.==
-(==)(A::ElasticArray, B::ElasticArray) =
-    ndims(A) == ndims(B) && A.kernel_size == B.kernel_size && A.data == B.data
+@inline function Base.:(==)(A::ElasticArray, B::ElasticArray)
+    return ndims(A) == ndims(B) && A.kernel_size == B.kernel_size && A.data == B.data
+end
 
 
-Base.parent(A::ElasticArray) = A.data
+@inline Base.size(A::ElasticArray) = (A.kernel_size..., div(length(eachindex(A.data)), A.kernel_length))
 
-Base.size(A::ElasticArray) = (A.kernel_size..., div(length(eachindex(A.data)), A.kernel_length))
-@propagate_inbounds Base.getindex(A::ElasticArray, i::Integer) = getindex(A.data, i)
-@propagate_inbounds Base.setindex!(A::ElasticArray, x, i::Integer) = setindex!(A.data, x, i)
-@inline Base.IndexStyle(A::ElasticArray) = IndexStyle(A.data)
+@inline Base.length(A::ElasticArray) = length(A.data)
 
-Base.length(A::ElasticArray) = length(A.data)
+@propagate_inbounds Base.getindex(A::ElasticArray, i::Int) = getindex(A.data, i)
 
-Base.dataids(A::ElasticArray) = Base.dataids(A.data)
+@propagate_inbounds Base.setindex!(A::ElasticArray, x, i::Int) = setindex!(A.data, x, i)
+
+Base.IndexStyle(::Type{<:ElasticArray}) = IndexLinear()
 
 
-@inline function Base.resize!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N}
-    kernel_size, size_lastdim = _split_resize_dims(A, dims)
+
+@inline Base.resize!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N} = resize!(A, dims)
+
+@inline function Base.resize!(A::ElasticArray{T,N}, dims::NTuple{N,Integer}) where {T,N}
+    _, size_lastdim = _split_resize_dims(A, dims)
     resize!(A.data, A.kernel_length.divisor * size_lastdim)
-    A
+    return A
 end
 
-@inline function Base.sizehint!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N}
-    kernel_size, size_lastdim = _split_resize_dims(A, dims)
-    sizehint!(A.data, A.kernel_length.divisor * size_lastdim)
-    A
+@inline function resize_lastdim!(A::ElasticArray, size_lastdim::Integer)
+    resize!(A.data, A.kernel_length.divisor * size_lastdim)
+    return A
 end
+
+
+@inline Base.sizehint!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N} = sizehint!(A, dims)
+
+@inline function Base.sizehint!(A::ElasticArray{T,N}, dims::NTuple{N,Integer}) where {T,N}
+    _, size_lastdim = _split_resize_dims(A, dims)
+    sizehint!(A.data, A.kernel_length.divisor * size_lastdim)
+    return A
+end
+
+@inline function sizehint_lastdim!(A::ElasticArray, size_lastdim::Integer)
+    sizehint!(A.data, A.kernel_length.divisor * size_lastdim)
+    return A
+end
+
 
 function _split_resize_dims(A::ElasticArray, dims::NTuple{N,Integer}) where {N}
     kernel_size, size_lastdim = _split_dims(dims)
     kernel_size != A.kernel_size && throw(ArgumentError("Can only resize last dimension of an ElasticArray"))
-    kernel_size, size_lastdim
+    return kernel_size, size_lastdim
 end
 
 
-function Base.append!(dest::ElasticArray, src::AbstractArray)
-    rem(length(eachindex(src)), dest.kernel_length) != 0 && throw(DimensionMismatch("Can't append, length of source array is incompatible"))
-    append!(dest.data, src)
-    dest
+function Base.append!(dest::ElasticArray, iter)
+    append!(dest.data, iter)
+    _check_size(dest)
+    return dest
+end
+
+function Base.prepend!(dest::ElasticArray, iter)
+    prepend!(dest.data, iter)
+    _check_size(dest)
+    return dest
+end
+
+@inline function _check_size(A::ElasticArray)
+    if rem(length(eachindex(A.data)), A.kernel_length) != 0
+        throw(DimensionMismatch("Can't append, length of source array is incompatible"))
+    end
+    nothing
 end
 
 
-function Base.prepend!(dest::ElasticArray, src::AbstractArray)
-    rem(length(eachindex(src)), dest.kernel_length) != 0 && throw(DimensionMismatch("Can't prepend, length of source array is incompatible"))
-    prepend!(dest.data, src)
-    dest
+@inline function Base.copyto!(
+    dest::ElasticArray,
+    doffs::Integer,
+    src::AbstractArray,
+    soffs::Integer,
+    N::Integer,
+)
+    copyto!(dest.data, doffs, src, soffs, N)
+    return dest
+end
+@inline function Base.copyto!(
+    dest::AbstractArray,
+    doffs::Integer,
+    src::ElasticArray,
+    soffs::Integer,
+    N::Integer,
+)
+    copyto!(dest, doffs, src.data, soffs, N)
 end
 
-
-@inline function _copyto_impl!(dest::ElasticArray, args...)
-    copyto!(dest.data, args...)
-    dest
-end
-
-@inline Base.copyto!(dest::ElasticArray, doffs::Integer, src::AbstractArray, args::Integer...) = _copyto_impl!(dest, doffs, src, args...)
-@inline Base.copyto!(dest::ElasticArray, src::AbstractArray) = _copyto_impl!(dest, src)
-
-@inline Base.copyto!(dest::ElasticArray, doffs::Integer, src::ElasticArray, args::Integer...) = _copyto_impl!(dest, doffs, src, args...)
-@inline Base.copyto!(dest::ElasticArray, src::ElasticArray) = _copyto_impl!(dest, src)
-
-@inline Base.copyto!(dest::AbstractArray, doffs::Integer, src::ElasticArray, args::Integer...) = copyto!(dest, doffs, src.data, args...)
+@inline Base.copyto!(dest::ElasticArray, src::AbstractArray) = (copyto!(dest.data, src); dest)
 @inline Base.copyto!(dest::AbstractArray, src::ElasticArray) = copyto!(dest, src.data)
 
+@inline function Base.copyto!(
+    dest::ElasticArray,
+    doffs::Integer,
+    src::ElasticArray,
+    soffs::Integer,
+    N::Integer,
+)
+    copyto!(dest.data, doffs, src.data, soffs, N)
+    return dest
+end
+@inline function Base.copyto!(dest::ElasticArray, src::ElasticArray)
+    copyto!(dest.data, src.data)
+    return dest
+end
 
-Base.similar(::Type{ElasticArray{T}}, dims::Dims{N}) where {T,N} = ElasticArray{T}(undef, dims...)
 
+@inline Base.dataids(A::ElasticArray) = Base.dataids(A.data)
 
-Base.unsafe_convert(::Type{Ptr{T}}, A::ElasticArray{T}) where T = Base.unsafe_convert(Ptr{T}, A.data)
+@inline Base.parent(A::ElasticArray) = A.data
 
-Base.pointer(A::ElasticArray, i::Integer) = pointer(A.data, i)
+@inline Base.unsafe_convert(::Type{Ptr{T}}, A::ElasticArray{T}) where T = Base.unsafe_convert(Ptr{T}, A.data)
+
+@inline Base.pointer(A::ElasticArray, i::Integer) = pointer(A.data, i)

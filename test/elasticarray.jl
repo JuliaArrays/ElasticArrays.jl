@@ -258,6 +258,23 @@ using Random
         resize_test(0)
         resize_test(2)
         resize_test(-2)
+
+
+        function resize_lastdim_test(delta::Integer)
+            test_E() do E
+                A = Array(deepcopy(E))
+                new_size = (Base.front(size(E))..., size(E, ndims(E)) + delta)
+                cmp_idxs = (Base.front(axes(E))..., 1:(last(size(E)) + min(0, delta)))
+                @test E === @inferred ElasticArrays.sizehint_lastdim!(E, size(E, ndims(E)) + delta)
+                @test E === @inferred ElasticArrays.resize_lastdim!(E, size(E, ndims(E)) + delta)
+                @test size(E) == new_size
+                @test E[cmp_idxs...] == A[cmp_idxs...]
+            end
+        end
+
+        resize_lastdim_test(0)
+        resize_lastdim_test(2)
+        resize_lastdim_test(-2)
     end
 
 
@@ -288,6 +305,24 @@ using Random
             end
             @test size(E) == (dims..., length(V))
             @test test_comp(E, V)
+        end
+
+        test_E() do E
+            kernel_size = Base.front(size(E))
+            kernel_length = last(size(E))
+            V = rand(Int, prod(kernel_size))
+            @inferred append!(E, (el for el in V))
+            @test size(E) == (kernel_size..., kernel_length + 1)
+            @test vec(E[:, :, kernel_length + 1]) == V
+        end
+
+        test_E() do E
+            kernel_size = Base.front(size(E))
+            kernel_length = last(size(E))
+            V = rand(Int, prod(kernel_size))
+            @inferred prepend!(E, (el for el in V))
+            @test size(E) == (kernel_size..., kernel_length + 1)
+            @test vec(E[:, :, 1]) == V
         end
     end
 
