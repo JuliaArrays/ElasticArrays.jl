@@ -126,24 +126,46 @@ function _split_resize_dims(A::ElasticArray, dims::NTuple{N,Integer}) where {N}
 end
 
 
-function Base.append!(dest::ElasticArray, iter)
-    append!(dest.data, iter)
-    _check_size(dest)
-    return dest
+Base.append!(A::ElasticArray, iter) = _append!(A, IteratorSize(iter), iter)
+
+function _append!(A::ElasticArray, ::Union{HasLength,HasShape}, iter)
+    _check_size(A, iter)
+    append!(A.data, iter)
+    return A
 end
 
-function Base.prepend!(dest::ElasticArray, iter)
-    prepend!(dest.data, iter)
-    _check_size(dest)
-    return dest
-end
-
-@inline function _check_size(A::ElasticArray)
-    if rem(length(eachindex(A.data)), A.kernel_length) != 0
-        throw(DimensionMismatch("Can't append, length of source array is incompatible"))
+function _append!(A::ElasticArray, ::IteratorSize, iter)
+    for item in iter
+        append!(A, item)
     end
-    nothing
+    return A
 end
+
+
+Base.prepend!(A::ElasticArray, iter) = _prepend!(A, IteratorSize(iter), iter)
+
+function _prepend!(A::ElasticArray, ::Union{HasLength,HasShape}, iter)
+    _check_size(A, iter)
+    prepend!(A.data, iter)
+    return A
+end
+
+function _prepend!(A::ElasticArray, ::IteratorSize, iter)
+    for item in iter
+        prepend!(A, item)
+    end
+    return A
+end
+
+
+
+@inline function _check_size(A::ElasticArray, iter)
+    if rem(length(iter), A.kernel_length) != 0
+        throw(DimensionMismatch("Length of source array is incompatible"))
+    end
+    return nothing
+end
+
 
 
 @inline function Base.copyto!(
