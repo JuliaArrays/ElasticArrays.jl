@@ -4,6 +4,8 @@ __precompile__(true)
 
 module ElasticArrays
 
+using Base: IteratorSize, HasLength, HasShape
+
 include("util.jl")
 include("elasticarray.jl")
 
