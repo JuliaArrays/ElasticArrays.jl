@@ -83,6 +83,8 @@ end
 
 @inline Base.length(A::ElasticArray) = length(A.data)
 
+@inline Base.sizeof(A::ElasticArray) = sizeof(A.data)
+
 @propagate_inbounds Base.getindex(A::ElasticArray, i::Int) = getindex(A.data, i)
 
 @propagate_inbounds Base.setindex!(A::ElasticArray, x, i::Int) = setindex!(A.data, x, i)
