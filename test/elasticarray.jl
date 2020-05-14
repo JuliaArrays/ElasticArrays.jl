@@ -58,6 +58,7 @@ using Random
             @test length(E) == prod(size(E))
             @test IndexStyle(E) == IndexLinear()
             @test eachindex(E) == eachindex(parent(E))
+            @test sizeof(E) == sizeof(E.data)
         end
     end
 
