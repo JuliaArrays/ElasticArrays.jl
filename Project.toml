@@ -6,7 +6,7 @@ version = "1.2.1"
 Adapt = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
 
 [compat]
-Adapt = "1.0"
+Adapt = "1.0, 2.0"
 julia = "1"
 
 [extras]
