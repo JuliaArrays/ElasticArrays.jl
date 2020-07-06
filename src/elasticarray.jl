@@ -92,6 +92,8 @@ end
 Base.IndexStyle(::Type{<:ElasticArray}) = IndexLinear()
 
 
+Base.elsize(::Type{ElasticArray{T,N,M,V}}) where {T,N,M,V} = Base.elsize(V)
+
 
 @inline Base.resize!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N} = resize!(A, dims)
 

@@ -3,7 +3,7 @@
 using ElasticArrays
 using Test
 
-using Random
+using Random, LinearAlgebra
 
 @testset "elasticarray" begin
     test_dims = (3, 2, 4)
@@ -59,6 +59,7 @@ using Random
             @test IndexStyle(E) == IndexLinear()
             @test eachindex(E) == eachindex(parent(E))
             @test sizeof(E) == sizeof(E.data)
+            @test Base.eltype(E) == Base.eltype(E.data)
         end
     end
 
@@ -354,5 +355,9 @@ using Random
         @test E1^3 == A1^3
         @test inv(E1) == inv(A1)
         @test inv(E1) isa ElasticArray{T,2}
+    end
+
+    @testset "linear algebra" begin
+        lmul!(cholesky(Array{Float32}([1 0; 0 1])).L, view(ElasticArray(Float32[1 1; 1 1]), :, 1)) == [1, 1]
     end
 end
