@@ -5,7 +5,7 @@ using Base: @propagate_inbounds
 using Base.MultiplicativeInverses: SignedMultiplicativeInverse
 using Base.Broadcast: Broadcast, ArrayStyle, Broadcasted
 
-export ElasticArray
+export ElasticArray, ElasticVector, ElasticMatrix
 
 
 """
@@ -19,7 +19,7 @@ Constructors:
     ElasticArray{T}(dims::Integer...)
     convert(ElasticArray, A::AbstractArray)
 """
-struct ElasticArray{T,N,M,V<:DenseVector{T}} <: DenseArray{T,N}
+struct ElasticArray{T,N,M,V <: DenseVector{T}} <: DenseArray{T,N}
     kernel_size::Dims{M}
     kernel_length::SignedMultiplicativeInverse{Int}
     data::V
@@ -38,7 +38,7 @@ function ElasticArray{T,N,M}(kernel_size, kernel_length, data) where {T,N,M}
     ElasticArray{T,N,M,typeof(data)}(kernel_size, kernel_length, data)
 end
 function ElasticArray{T,N}(kernel_size, kernel_length, data) where {T,N,M}
-    ElasticArray{T,N,N-1}(kernel_size, kernel_length, data)
+    ElasticArray{T,N,N - 1}(kernel_size, kernel_length, data)
 end
 
 
@@ -50,7 +50,7 @@ function ElasticArray{T,N,M,V}(::UndefInitializer, dims::NTuple{N,Integer}) wher
     ElasticArray{T,N,M,V}(kernel_size, SignedMultiplicativeInverse{Int}(kernel_length), data)
 end
 ElasticArray{T,N,M}(::UndefInitializer, dims::NTuple{N,Integer}) where {T,N,M} = ElasticArray{T,N,M,Vector{T}}(undef, dims)
-ElasticArray{T,N}(::UndefInitializer, dims::NTuple{N,Integer}) where {T,N} = ElasticArray{T,N,N-1}(undef, dims)
+ElasticArray{T,N}(::UndefInitializer, dims::NTuple{N,Integer}) where {T,N} = ElasticArray{T,N,N - 1}(undef, dims)
 ElasticArray{T}(::UndefInitializer, dims::NTuple{N,Integer}) where {T,N} = ElasticArray{T,N}(undef, dims)
 
 ElasticArray{T,N,M,V}(::UndefInitializer, dims::Vararg{Integer,N}) where {T,N,M,V} = ElasticArray{T,N,M,V}(undef, dims)
@@ -64,7 +64,7 @@ ElasticArray{T,N}(A::AbstractArray{<:Any,N}) where {T,N} = copyto!(ElasticArray{
 ElasticArray{T}(A::AbstractArray{<:Any,N}) where {T,N} = copyto!(ElasticArray{T,N}(undef, size(A)), A)
 ElasticArray(A::AbstractArray{T,N}) where {T,N} = copyto!(ElasticArray{T,N}(undef, size(A)), A)
 
-Base.convert(::Type{T}, A::AbstractArray) where {T<:ElasticArray} = A isa T ? A : T(A)
+Base.convert(::Type{T}, A::AbstractArray) where {T <: ElasticArray} = A isa T ? A : T(A)
 
 
 @inline function Base.similar(A::ElasticArray, ::Type{T}, dims::Dims{N}) where {T,N}
@@ -229,3 +229,12 @@ function Adapt.adapt_structure(to, A::ElasticArray{<:Any,N,M}) where {N,M}
     data = adapt(to, A.data)
     ElasticArray{eltype(data),N,M,typeof(data)}(A.kernel_size, A.kernel_length, data)
 end
+
+"""
+Type alias for `ElasticArray{T,1}`.
+"""
+const ElasticVector{T} = ElasticArray{T,1}
+"""
+Type alias for `ElasticArray{T,2}`.
+"""
+const ElasticMatrix{T} = ElasticArray{T,2}
