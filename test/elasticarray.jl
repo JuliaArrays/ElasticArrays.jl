@@ -360,4 +360,26 @@ using Random, LinearAlgebra
     @testset "linear algebra" begin
         lmul!(cholesky(Array{Float32}([1 0; 0 1])).L, view(ElasticArray(Float32[1 1; 1 1]), :, 1)) == [1, 1]
     end
+
+    @testset "ElasticVector" begin
+        @test ElasticVector{Int} === ElasticArray{Int,1}
+        @test size(ElasticVector{Float64}(undef, 2)) == (2,)
+        @test size(ElasticVector([-1, 1, 0])) == (3,)
+        @test ElasticVector([1, 2, 3]) == [1, 2, 3]
+        @test eltype(ElasticVector([1.0, 2.1])) === Float64
+        @test eltype(ElasticVector{Float32}([1, 2, 3])) === Float32
+        @test_throws Exception ElasticVector([1 2 3])
+        @test_throws Exception ElasticVector(zeros(2, 3, 4))
+    end
+
+    @testset "ElasticMatrix" begin
+        @test ElasticMatrix{Int} === ElasticArray{Int,2}
+        @test size(ElasticMatrix{Float64}(undef, 2, 3)) == (2, 3)
+        @test size(ElasticMatrix([1 2 3; 4 5 6])) == (2, 3)
+        @test ElasticMatrix([1 2; 3 4]) == [1 2; 3 4]
+        @test eltype(ElasticMatrix([1.0 2; 3 4.1])) === Float64
+        @test eltype(ElasticMatrix{Float32}([1 2])) === Float32
+        @test_throws Exception ElasticMatrix([1, 2, 3])
+        @test_throws Exception ElasticMatrix(zeros(2, 3, 4))
+    end
 end

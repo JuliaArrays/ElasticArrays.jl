@@ -5,7 +5,7 @@ using Base: @propagate_inbounds
 using Base.MultiplicativeInverses: SignedMultiplicativeInverse
 using Base.Broadcast: Broadcast, ArrayStyle, Broadcasted
 
-export ElasticArray
+export ElasticArray, ElasticVector, ElasticMatrix
 
 
 """
@@ -229,3 +229,33 @@ function Adapt.adapt_structure(to, A::ElasticArray{<:Any,N,M}) where {N,M}
     data = adapt(to, A.data)
     ElasticArray{eltype(data),N,M,typeof(data)}(A.kernel_size, A.kernel_length, data)
 end
+
+
+"""
+    const ElasticVector{T,M,V<:DenseVector{T}} = ElasticArray{T,1,M,V}
+
+Type alias for 1D `ElasticArray`.
+"""
+const ElasticVector{T,M,V<:DenseVector{T}} = ElasticArray{T,1,M,V}
+
+"""
+    ElasticVector(A::AbstractVector{T}) where {T}
+
+Construct an `ElasticVector` from an `AbstractVector`.
+"""
+ElasticVector(A::AbstractVector{T}) where {T} = ElasticArray(A)
+
+
+"""
+    const ElasticMatrix{T,M,V<:DenseVector{T}} = ElasticArray{T,2,M,V}
+
+Type alias for 2D `ElasticArray`.
+"""
+const ElasticMatrix{T,M,V<:DenseVector{T}} = ElasticArray{T,2,M,V}
+
+"""
+    ElasticMatrix(A::AbstractMatrix{T}) where {T}
+
+Construct an `ElasticMatrix` from an `AbstractMatrix`.
+"""
+ElasticMatrix(A::AbstractMatrix{T}) where {T} = ElasticArray(A)
