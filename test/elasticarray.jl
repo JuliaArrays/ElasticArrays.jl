@@ -52,7 +52,7 @@ using Random, LinearAlgebra
 
     @testset "size, length and index style" begin
         @test (4,) == @inferred size(@inferred ElasticArray{Int}(undef, 4))
-        @test (2,3,4) == @inferred size(@inferred ElasticArray{Int}(undef, 2,3,4))
+        @test (2, 3, 4) == @inferred size(@inferred ElasticArray{Int}(undef, 2, 3, 4))
 
         test_E() do E
             @test length(E) == prod(size(E))
@@ -74,7 +74,7 @@ using Random, LinearAlgebra
             @test all(i -> E[i] == A[i], CartesianIndices(size(A)))
         end
 
-        @test all(x -> x == 42, @inferred fill!(ElasticArray{Int}(undef, 2,3,4), 42))
+        @test all(x -> x == 42, @inferred fill!(ElasticArray{Int}(undef, 2, 3, 4), 42))
     end
 
 
@@ -227,8 +227,8 @@ using Random, LinearAlgebra
             @test eltype(E) == eltype(A)
         end
 
-        @test typeof(@inferred similar(ElasticArray{Int}, (2,3,4))) == ElasticArray{Int,3,2,Vector{Int}}
-        @test size(@inferred similar(ElasticArray{Int}, (2,3,4))) == (2,3,4)
+        @test typeof(@inferred similar(ElasticArray{Int}, (2, 3, 4))) == ElasticArray{Int,3,2,Vector{Int}}
+        @test size(@inferred similar(ElasticArray{Int}, (2, 3, 4))) == (2, 3, 4)
     end
 
 
@@ -281,7 +281,7 @@ using Random, LinearAlgebra
 
 
     @testset "append! and prepend!" begin
-       test_A() do A
+        test_A() do A
             E = @inferred convert(ElasticArray{Float64}, A)
             @test E isa ElasticArray
             @test E == A
@@ -359,5 +359,27 @@ using Random, LinearAlgebra
 
     @testset "linear algebra" begin
         lmul!(cholesky(Array{Float32}([1 0; 0 1])).L, view(ElasticArray(Float32[1 1; 1 1]), :, 1)) == [1, 1]
+    end
+
+    @testset "ElasticVector" begin
+        @test ElasticVector{Int} === ElasticArray{Int,1}
+        @test size(ElasticVector{Float64}(undef, 2)) == (2,)
+        @test size(ElasticVector([-1, 1, 0])) == (3,)
+        @test ElasticVector([1, 2, 3]) == [1, 2, 3]
+        @test eltype(ElasticVector([1.0, 2.1])) === Float64
+        @test eltype(ElasticVector{Float32}([1, 2, 3])) === Float32
+        @test_throws Exception ElasticVector([1 2 3])
+        @test_throws Exception ElasticVector(zeros(2, 3, 4))
+    end
+
+    @testset "ElasticMatrix" begin
+        @test ElasticMatrix{Int} === ElasticArray{Int,2}
+        @test size(ElasticMatrix{Float64}(undef, 2, 3)) == (2, 3)
+        @test size(ElasticMatrix([1 2 3; 4 5 6])) == (2, 3)
+        @test ElasticMatrix([1 2; 3 4]) == [1 2; 3 4]
+        @test eltype(ElasticMatrix([1.0 2; 3 4.1])) === Float64
+        @test eltype(ElasticMatrix{Float32}([1 2])) === Float32
+        @test_throws Exception ElasticMatrix([1, 2, 3])
+        @test_throws Exception ElasticMatrix(zeros(2, 3, 4))
     end
 end
