@@ -51,13 +51,17 @@ using Random, LinearAlgebra
     end
 
     @testset "size, length and index style" begin
+        let A = ElasticArray{Float32}(undef, 2, 5)
+            @test ElasticArrays._parent(A) === A.data
+        end
+
         @test (4,) == @inferred size(@inferred ElasticArray{Int}(undef, 4))
         @test (2,3,4) == @inferred size(@inferred ElasticArray{Int}(undef, 2,3,4))
 
         test_E() do E
             @test length(E) == prod(size(E))
             @test IndexStyle(E) == IndexLinear()
-            @test eachindex(E) == eachindex(parent(E))
+            @test eachindex(E) == eachindex(ElasticArrays._parent(E))
             @test sizeof(E) == sizeof(E.data)
             @test Base.eltype(E) == Base.eltype(E.data)
         end
@@ -69,7 +73,6 @@ using Random, LinearAlgebra
             for i in eachindex(E, A)
                 E[i] = A[i]
             end
-            @test parent(E) == A
             @test all(i -> E[i] == A[i], eachindex(E, A))
             @test all(i -> E[i] == A[i], CartesianIndices(size(A)))
         end
@@ -95,7 +98,7 @@ using Random, LinearAlgebra
     @testset "mightalias and dataids" begin
         E1 = ElasticArray{Int}(undef, 10, 5)
         E2 = ElasticArray{Int}(undef, 10, 5)
-        @test Base.dataids(parent(E1)) == @inferred Base.dataids(E1)
+        @test Base.dataids(ElasticArrays._parent(E1)) == @inferred Base.dataids(E1)
         @test @inferred !Base.mightalias(E1, E2)
         @test @inferred !Base.mightalias(view(E1, 2:3, 1:2), view(E1, 4:5, 1:2))
         @test @inferred Base.mightalias(view(E1, 2:4, 1:2), view(E1, 3:5, 1:2))
@@ -234,12 +237,12 @@ using Random, LinearAlgebra
 
     @testset "pointer and unsafe_convert" begin
         test_E() do E
-            @test pointer(E) == pointer(parent(E))
-            @test pointer(E, 4) == pointer(parent(E), 4)
+            @test pointer(E) == pointer(ElasticArrays._parent(E))
+            @test pointer(E, 4) == pointer(ElasticArrays._parent(E), 4)
         end
 
         test_E() do E
-            @test Base.unsafe_convert(Ptr{eltype(E)}, E) == Base.unsafe_convert(Ptr{eltype(E)}, parent(E))
+            @test Base.unsafe_convert(Ptr{eltype(E)}, E) == Base.unsafe_convert(Ptr{eltype(E)}, ElasticArrays._parent(E))
         end
     end
 
