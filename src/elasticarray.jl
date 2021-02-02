@@ -79,7 +79,7 @@ end
 end
 
 
-@inline _parent(A::ElasticArray) = A.data
+@inline Base.vec(A::ElasticArray) = A.data
 
 @inline Base.size(A::ElasticArray) = (A.kernel_size..., div(length(eachindex(A.data)), A.kernel_length))
 
