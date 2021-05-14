@@ -48,6 +48,9 @@ using Random, LinearAlgebra
         @test size(ElasticArray{Int}(undef, 2, 3, 4).data) == (2 * 3 * 4,)
 
         @test fill!((@inferred ElasticArray{Int}(undef, 2, 3, 4)), 42) == fill!(ElasticArray{Int}(undef, 2, 3, 4), 42)
+
+        @test size(@inferred(ElasticArray{Float64}(undef, 0, 2, 0))) == (0, 2, 0)
+        @test_throws ArgumentError ElasticArray{Float64}(undef, 0, 2, 3)
     end
 
     @testset "size, length and index style" begin
@@ -233,6 +236,8 @@ using Random, LinearAlgebra
 
         @test typeof(@inferred similar(ElasticArray{Int}, (2,3,4))) == ElasticArray{Int,3,2,Vector{Int}}
         @test size(@inferred similar(ElasticArray{Int}, (2,3,4))) == (2,3,4)
+
+        @test size(@inferred(similar(ElasticArray{Int}(undef, 3, 4), Float32, (0, 2)))) == (0, 0)
     end
 
 
@@ -385,5 +390,11 @@ using Random, LinearAlgebra
         @test eltype(ElasticMatrix{Float32}([1 2])) === Float32
         @test_throws Exception ElasticMatrix([1, 2, 3])
         @test_throws Exception ElasticMatrix(zeros(2, 3, 4))
+    end
+
+    @testset "Regression tests" begin
+        let A = ElasticArray([3.2 0.5; 0.5 2.0])
+            @test eigvals(A) == eigvals(Array(A))
+        end
     end
 end
