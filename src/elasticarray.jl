@@ -83,7 +83,7 @@ end
 
 @inline Base.size(A::ElasticArray) = (A.kernel_size..., div(length(eachindex(A.data)), A.kernel_length))
 
-@inline Base.length(A::ElasticArray) = length(A.data)
+@inline Base.length(A::ElasticArray) = length(eachindex(A.data))
 
 @inline Base.sizeof(A::ElasticArray) = sizeof(A.data)
 
