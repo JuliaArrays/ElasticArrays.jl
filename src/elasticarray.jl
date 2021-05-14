@@ -41,13 +41,15 @@ function ElasticArray{T,N}(kernel_size, kernel_length, data) where {T,N,M}
     ElasticArray{T,N,N-1}(kernel_size, kernel_length, data)
 end
 
-
+# Need to support ElasticArrays with zero-sized kernel, e.g. for LinearAlgebra.eigvals
+_smi_kernel_size(kernel_length::Integer) = SignedMultiplicativeInverse{Int}(kernel_length != 0 ? kernel_length : -1)
 
 function ElasticArray{T,N,M,V}(::UndefInitializer, dims::NTuple{N,Integer}) where {T,N,M,V}
     kernel_size, size_lastdim = _split_dims(dims)
     kernel_length = prod(kernel_size)
+    kernel_length == 0 && size_lastdim != 0 && throw(ArgumentError("ElasticArray with empty kernel must have 0-sized last dimension"))
     data = similar(V, kernel_length * size_lastdim)
-    ElasticArray{T,N,M,V}(kernel_size, SignedMultiplicativeInverse{Int}(kernel_length), data)
+    ElasticArray{T,N,M,V}(kernel_size, _smi_kernel_size(kernel_length), data)
 end
 ElasticArray{T,N,M}(::UndefInitializer, dims::NTuple{N,Integer}) where {T,N,M} = ElasticArray{T,N,M,Vector{T}}(undef, dims)
 ElasticArray{T,N}(::UndefInitializer, dims::NTuple{N,Integer}) where {T,N} = ElasticArray{T,N,N-1}(undef, dims)
@@ -66,12 +68,13 @@ ElasticArray(A::AbstractArray{T,N}) where {T,N} = copyto!(ElasticArray{T,N}(unde
 
 Base.convert(::Type{T}, A::AbstractArray) where {T<:ElasticArray} = A isa T ? A : T(A)
 
-
+g_state = nothing
 @inline function Base.similar(A::ElasticArray, ::Type{T}, dims::Dims{N}) where {T,N}
+    global g_state = (A=A, T=T, dims=dims)
     kernel_size, size_lastdim = _split_dims(dims)
     kernel_length = prod(kernel_size)
     data = similar(A.data, T, prod(dims))
-    ElasticArray{T,N}(kernel_size, SignedMultiplicativeInverse{Int}(kernel_length), data)
+    ElasticArray{T,N}(kernel_size, _smi_kernel_size(kernel_length), data)
 end
 
 @inline function Base.:(==)(A::ElasticArray, B::ElasticArray)
@@ -164,14 +167,13 @@ function _prepend!(A::ElasticArray, ::IteratorSize, iter)
 end
 
 
-
 @inline function _check_size(A::ElasticArray, iter)
-    if rem(length(iter), A.kernel_length) != 0
+    n = length(iter)
+    if rem(n, A.kernel_length) != 0 || A.kernel_length.divisor <= 0 && n > 0
         throw(DimensionMismatch("Length of source array is incompatible"))
     end
     return nothing
 end
-
 
 
 @inline function Base.copyto!(
