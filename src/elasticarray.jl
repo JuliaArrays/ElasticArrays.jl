@@ -238,11 +238,11 @@ end
 
 
 """
-    const ElasticVector{T,M,V<:DenseVector{T}} = ElasticArray{T,1,M,V}
+    const ElasticVector{T,V<:DenseVector{T}} = ElasticArray{T,1,0,V}
 
 Type alias for 1D `ElasticArray`.
 """
-const ElasticVector{T,M,V<:DenseVector{T}} = ElasticArray{T,1,M,V}
+const ElasticVector{T,V<:DenseVector{T}} = ElasticArray{T,1,0,V}
 
 """
     ElasticVector(A::AbstractVector{T}) where {T}
@@ -253,11 +253,11 @@ ElasticVector(A::AbstractVector{T}) where {T} = ElasticArray(A)
 
 
 """
-    const ElasticMatrix{T,M,V<:DenseVector{T}} = ElasticArray{T,2,M,V}
+    const ElasticMatrix{T,V<:DenseVector{T}} = ElasticArray{T,2,1,V}
 
 Type alias for 2D `ElasticArray`.
 """
-const ElasticMatrix{T,M,V<:DenseVector{T}} = ElasticArray{T,2,M,V}
+const ElasticMatrix{T,V<:DenseVector{T}} = ElasticArray{T,2,1,V}
 
 """
     ElasticMatrix(A::AbstractMatrix{T}) where {T}

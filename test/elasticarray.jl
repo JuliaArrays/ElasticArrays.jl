@@ -377,7 +377,8 @@ using Random, LinearAlgebra
     end
 
     @testset "ElasticVector" begin
-        @test ElasticVector{Int} === ElasticArray{Int,1}
+        @test ElasticVector{Int} === ElasticArray{Int,1,0}
+        @test ElasticArray(rand(Float32, 2)) isa ElasticVector{Float32}
         @test size(ElasticVector{Float64}(undef, 2)) == (2,)
         @test size(ElasticVector([-1, 1, 0])) == (3,)
         @test ElasticVector([1, 2, 3]) == [1, 2, 3]
@@ -388,7 +389,8 @@ using Random, LinearAlgebra
     end
 
     @testset "ElasticMatrix" begin
-        @test ElasticMatrix{Int} === ElasticArray{Int,2}
+        @test ElasticMatrix{Int} === ElasticArray{Int,2,1}
+        @test ElasticArray(rand(Float32, 2, 3)) isa ElasticMatrix{Float32}
         @test size(ElasticMatrix{Float64}(undef, 2, 3)) == (2, 3)
         @test size(ElasticMatrix([1 2 3; 4 5 6])) == (2, 3)
         @test ElasticMatrix([1 2; 3 4]) == [1 2; 3 4]
