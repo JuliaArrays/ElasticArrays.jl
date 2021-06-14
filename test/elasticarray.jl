@@ -237,6 +237,12 @@ using Random, LinearAlgebra
         @test typeof(@inferred similar(ElasticArray{Int}, (2,3,4))) == ElasticArray{Int,3,2,Vector{Int}}
         @test size(@inferred similar(ElasticArray{Int}, (2,3,4))) == (2,3,4)
 
+        @test typeof(@inferred similar(ElasticArray{Int}(undef,4,5), (2,3,4))) == ElasticArray{Int,3,2,Vector{Int}}
+        @test size(@inferred similar(ElasticArray{Int}(undef,4,5), (2,3,4))) == (2,3,4)
+
+        @test typeof(@inferred similar(ElasticArray{Int}(undef,4,5), ())) == Array{Int,0}
+        @test size(@inferred similar(ElasticArray{Int}(undef,4,5), ())) == ()
+
         @test size(@inferred(similar(ElasticArray{Int}(undef, 3, 4), Float32, (0, 2)))) == (0, 0)
     end
 

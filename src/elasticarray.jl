@@ -68,12 +68,16 @@ ElasticArray(A::AbstractArray{T,N}) where {T,N} = copyto!(ElasticArray{T,N}(unde
 
 Base.convert(::Type{T}, A::AbstractArray) where {T<:ElasticArray} = A isa T ? A : T(A)
 
+
 @inline function Base.similar(A::ElasticArray, ::Type{T}, dims::Dims{N}) where {T,N}
     kernel_size, size_lastdim = _split_dims(dims)
     kernel_length = prod(kernel_size)
     data = similar(A.data, T, prod(dims))
     ElasticArray{T,N}(kernel_size, _smi_kernel_size(kernel_length), data)
 end
+
+@inline Base.similar(A::ElasticArray, ::Type{T}, dims::Dims{0}) where {T} = similar(A.data, T, dims)
+
 
 @inline function Base.:(==)(A::ElasticArray, B::ElasticArray)
     return ndims(A) == ndims(B) && A.kernel_size == B.kernel_size && A.data == B.data
