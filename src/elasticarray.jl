@@ -51,14 +51,15 @@ function ElasticArray{T,N,M,V}(::UndefInitializer, dims::NTuple{N,Integer}) wher
     data = similar(V, kernel_length * size_lastdim)
     ElasticArray{T,N,M,V}(kernel_size, _smi_kernel_size(kernel_length), data)
 end
+
 ElasticArray{T,N,M}(::UndefInitializer, dims::NTuple{N,Integer}) where {T,N,M} = ElasticArray{T,N,M,Vector{T}}(undef, dims)
 ElasticArray{T,N}(::UndefInitializer, dims::NTuple{N,Integer}) where {T,N} = ElasticArray{T,N,N-1}(undef, dims)
 ElasticArray{T}(::UndefInitializer, dims::NTuple{N,Integer}) where {T,N} = ElasticArray{T,N}(undef, dims)
 
 ElasticArray{T,N,M,V}(::UndefInitializer, dims::Vararg{Integer,N}) where {T,N,M,V} = ElasticArray{T,N,M,V}(undef, dims)
-ElasticArray{T,N,M}(::UndefInitializer, dims::Vararg{Integer,N}) where {T,N,M,V} = ElasticArray{T,N,M}(undef, dims)
-ElasticArray{T,N}(::UndefInitializer, dims::Vararg{Integer,N}) where {T,N,M,V} = ElasticArray{T,N}(undef, dims)
-ElasticArray{T}(::UndefInitializer, dims::Vararg{Integer,N}) where {T,N,M,V} = ElasticArray{T,N}(undef, dims)
+ElasticArray{T,N,M}(::UndefInitializer, dims::Vararg{Integer,N}) where {T,N,M} = ElasticArray{T,N,M}(undef, dims)
+ElasticArray{T,N}(::UndefInitializer, dims::Vararg{Integer,N}) where {T,N} = ElasticArray{T,N}(undef, dims)
+ElasticArray{T}(::UndefInitializer, dims::Vararg{Integer,N}) where {T,N} = ElasticArray{T,N}(undef, dims)
 
 ElasticArray{T,N,M,V}(A::AbstractArray{<:Any,N}) where {T,N,M,V} = copyto!(ElasticArray{T,N,M,V}(undef, size(A)), A)
 ElasticArray{T,N,M}(A::AbstractArray{<:Any,N}) where {T,N,M} = copyto!(ElasticArray{T,N,M}(undef, size(A)), A)
