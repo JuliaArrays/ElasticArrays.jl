@@ -37,7 +37,7 @@ end
 function ElasticArray{T,N,M}(kernel_size, kernel_length, data) where {T,N,M}
     ElasticArray{T,N,M,typeof(data)}(kernel_size, kernel_length, data)
 end
-function ElasticArray{T,N}(kernel_size, kernel_length, data) where {T,N,M}
+function ElasticArray{T,N}(kernel_size, kernel_length, data) where {T,N}
     ElasticArray{T,N,N-1}(kernel_size, kernel_length, data)
 end
 
