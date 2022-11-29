@@ -55,6 +55,7 @@ using Random, LinearAlgebra
 
     @testset "size, length and index style" begin
         let A = ElasticArray{Float32}(undef, 2, 5)
+            rand!(A)
             @test vec(A) === A.data
             @test vec(A) == vec(Array(A))
         end
