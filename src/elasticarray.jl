@@ -116,6 +116,15 @@ end
     return A
 end
 
+function Base.deleteat!(A::ElasticArray{T,N}, idxs::Vararg{Union{Tuple{},Int,Vector{Int},UnitRange{Int}},N}) where {T,N}
+    d = ndims(A)
+    prod(isempty.(first(idxs, length(idxs) - 1))) || throw(ArgumentError("Can only delete elements in the last dimension of A"))
+    keep = setdiff(axes(A, d), last(idxs))
+    copyto!(A, selectdim(A, d, keep))
+    resize_lastdim!(A, length(keep))
+    return A
+end
+
 
 @inline Base.sizehint!(A::ElasticArray{T,N}, dims::Vararg{Integer,N}) where {T,N} = sizehint!(A, dims)
 
