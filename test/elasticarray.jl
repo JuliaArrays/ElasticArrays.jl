@@ -296,6 +296,22 @@ using Random, LinearAlgebra
     end
 
 
+    @testset "deleteat!" begin
+
+        test_E() do E
+            b = deepcopy(E)
+            n = ndims(E)
+            s = size(E,n)
+
+            @test_throws ArgumentError deleteat!(E, ntuple(_ -> 1, ndims(E)))
+            @test_throws MethodError deleteat!(E, ntuple(_ -> (), ndims(E) - 1))
+            @test_throws BoundsError deleteat!(E, ntuple(i -> i == n ? s + 1 : (), n))
+            @test E == @inferred deleteat!(E, ntuple(_ -> (), n))
+            @test selectdim(E, n, 2:s) == @inferred deleteat!(b, ntuple(i -> i == n ? 1 : (), n))
+        end
+
+    end 
+
     @testset "append! and prepend!" begin
        test_A() do A
             E = @inferred convert(ElasticArray{Float64}, A)
